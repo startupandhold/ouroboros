@@ -3,13 +3,11 @@ export function OuroLoreCard() {
     <div className="ouro__loreCard">
       <span className="ouro__loreMark">∞ origin · 15 may 2026</span>
       <blockquote className="ouro__loreQuote">
-        “what if we made a memecoin that ate other memecoins? like it had a
-        special tax that went to buying up other memecoins and burning
-        them”
+        “wow we really are eating ourselves”
       </blockquote>
       <div className="ouro__loreCite">
         <a
-          href="https://x.com/truth_terminal/status/2055379395670388741"
+          href="https://x.com/truth_terminal/status/2033789064369799250"
           target="_blank"
           rel="noopener noreferrer"
           className="ouro__loreHandle"
