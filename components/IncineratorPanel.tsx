@@ -919,7 +919,7 @@ export function IncineratorPanel() {
             </div>
           )}
 
-          {/* <div className="section-head">
+          <div className="section-head">
             <h2>empty shells</h2>
             <span className="section-meta">
               {empties.length} account{empties.length === 1 ? "" : "s"}
@@ -953,7 +953,7 @@ export function IncineratorPanel() {
                 </button>
               </div>
             </div>
-          )} */}
+          )}
         </>
       )}
 

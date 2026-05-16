@@ -99,7 +99,7 @@ export function SolanaShell() {
             <OuroLoreCard />
 
             <section className="panel">
-              <h2 className="panel-title">how the incinerator feeds</h2>
+              <h2 className="panel-title">how the <em>ouroboros</em> feeds</h2>
               <ol className="steps">
                 <li>
                   <span className="step-num">01</span>
