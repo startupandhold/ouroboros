@@ -20,6 +20,7 @@ const PUMP_COIN_URL =
   "https://pump.fun/coin/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
 const X_COMMUNITY_URL =
   "https://x.com/i/communities/2019097621818929284";
+const GITHUB_URL = "https://github.com/startupandhold/ouroboros";
 const OURO_MINT_STR = OUROBOROS_MINT.toBase58();
 
 export function SolanaShell() {
@@ -79,6 +80,21 @@ export function SolanaShell() {
                       aria-hidden
                     />
                   </a>
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="top-bar-icon"
+                    aria-label="Ouroboros on GitHub"
+                  >
+                    <Image
+                      src="/image/github.png"
+                      alt=""
+                      width={20}
+                      height={20}
+                      aria-hidden
+                    />
+                  </a>
                 </div>
                 <span>solana · mainnet</span>
               </div>
@@ -115,9 +131,12 @@ export function SolanaShell() {
                 <video
                   className="hero-video-el"
                   src="/video/ouroboros.mp4"
-                  controls
+                  autoPlay
+                  loop
+                  muted
                   playsInline
-                  preload="metadata"
+                  controls
+                  preload="auto"
                   aria-label="Ouroboros"
                 />
               </div>
