@@ -9,8 +9,8 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-import { useMemo } from "react";
-import { DEFAULT_RPC } from "@/lib/constants";
+import { useCallback, useMemo, useState } from "react";
+import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
 
@@ -18,13 +18,25 @@ const PUMP_COIN_URL =
   "https://pump.fun/coin/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
 const X_COMMUNITY_URL =
   "https://x.com/i/communities/2019097621818929284";
+const OURO_MINT_STR = OUROBOROS_MINT.toBase58();
 
 export function SolanaShell() {
+  const [mintCopied, setMintCopied] = useState(false);
   const endpoint = useMemo(() => DEFAULT_RPC, []);
   const wallets = useMemo(
     () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
     [],
   );
+
+  const copyMint = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(OURO_MINT_STR);
+      setMintCopied(true);
+      window.setTimeout(() => setMintCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }, []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
@@ -83,6 +95,21 @@ export function SolanaShell() {
                   Ouroboros
                 </a>
               </h1>
+              <button
+                type="button"
+                className={`hero-mint${mintCopied ? " hero-mint--copied" : ""}`}
+                onClick={() => void copyMint()}
+                aria-label={
+                  mintCopied
+                    ? "Mint address copied"
+                    : "Copy OUROBOROS mint address"
+                }
+              >
+                <code>{OURO_MINT_STR}</code>
+                <span className="hero-mint-hint">
+                  {mintCopied ? "copied" : "click to copy"}
+                </span>
+              </button>
               <p className="hero-tag">the snake eats its tail. forever.</p>
               <div className="hero-video">
                 <video
@@ -149,11 +176,7 @@ export function SolanaShell() {
               → on-chain SPL burn of OURO when applicable. The empty-shells button uses the same
               Jupiter + burn pattern. USD slider uses DexScreener and can be wrong
               or missing. You approve every transaction. OUROBOROS mint:{" "}
-              <code style={{ color: "var(--fg)" }}>
-                2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump
-              </code>
-              . Set{" "}
-              <code>NEXT_PUBLIC_SOLANA_RPC_URL</code> for a dedicated RPC.
+              <a href={`https://pump.fun/coin/${OURO_MINT_STR}`} target="_blank" rel="noopener noreferrer">{OURO_MINT_STR}</a>.
             </p>
           </div>
         </WalletModalProvider>
