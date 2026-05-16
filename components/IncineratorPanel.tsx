@@ -940,7 +940,7 @@ export function IncineratorPanel() {
                 OUROBOROS, then SPL-burns whatever OURO lands in your ATA (Sol
                 Incinerator is used for batch closes / dust burns when configured).
               </span>
-              {/* <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                 <button
                   type="button"
                   className="btn btn-accent"
@@ -951,7 +951,7 @@ export function IncineratorPanel() {
                     ? "working…"
                     : "close all → buyback → burn"}
                 </button>
-              </div> */}
+              </div>
             </div>
           )}
         </>
