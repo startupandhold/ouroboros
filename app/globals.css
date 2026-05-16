@@ -512,3 +512,41 @@ button {
   letter-spacing: 0.04em;
   min-width: 5rem;
 }
+
+.ouro-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+  margin: 0 0 2.5rem;
+}
+
+.ouro-showcase > .ouro__loreCard,
+.ouro-showcase > .ouro-supply {
+  margin: 0;
+  max-width: none;
+  width: 100%;
+  min-width: 0;
+}
+
+.ouro-showcase > .ouro__loreCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ouro-showcase > .ouro-supply {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.25rem 1rem 1rem;
+  background: linear-gradient(#ffffff04 0%, transparent 100%);
+}
+
+@media (max-width: 720px) {
+  .ouro-showcase {
+    grid-template-columns: 1fr;
+  }
+}

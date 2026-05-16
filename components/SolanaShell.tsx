@@ -13,6 +13,7 @@ import { useCallback, useMemo, useState } from "react";
 import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
+import { OuroSupplySerpent } from "@/components/OuroSupplySerpent";
 
 const PUMP_COIN_URL =
   "https://pump.fun/coin/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
@@ -123,7 +124,10 @@ export function SolanaShell() {
               </div>
             </section>
 
-            <OuroLoreCard />
+            <div className="ouro-showcase">
+              <OuroLoreCard />
+              <OuroSupplySerpent />
+            </div>
 
             <section className="panel">
               <h2 className="panel-title">how the <em>ouroboros</em> feeds</h2>

@@ -72,6 +72,7 @@
   border-radius: 16px;
   width: 100%;
   max-width: 720px;
+  height: 100%;
   padding: 22px 24px 20px;
   animation: ouro-fade 2.4s 0.75s both;
   position: relative;

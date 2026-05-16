@@ -1,0 +1,212 @@
+.ouro-supply {
+  margin: 0 auto 2.5rem;
+  max-width: 380px;
+  padding: 0 0.5rem;
+  animation: ouro-supply-in 1.2s 0.2s both;
+  box-sizing: border-box;
+}
+
+@keyframes ouro-supply-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ouro-supply__label {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.ouro-supply__ring {
+  position: relative;
+  width: min(100%, 280px);
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+.ouro-showcase .ouro-supply__ring {
+  width: min(100%, 260px);
+}
+
+.ouro-supply__art {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ouro-supply__serpent {
+  width: 94%;
+  height: auto;
+  object-fit: contain;
+  animation: ouro-supply-orbit 56s linear infinite;
+  will-change: transform;
+}
+
+.ouro-supply__art--loading .ouro-supply__serpent {
+  animation: ouro-supply-orbit 56s linear infinite,
+    ouro-supply-loading 1.8s ease-in-out infinite;
+}
+
+@keyframes ouro-supply-orbit {
+  0% {
+    transform: rotate(0deg) scale(0.94);
+  }
+  25% {
+    transform: rotate(90deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(0.94);
+  }
+  75% {
+    transform: rotate(270deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(0.94);
+  }
+}
+
+@keyframes ouro-supply-loading {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.ouro-supply__center {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+  padding: 2.25rem 1.25rem;
+}
+
+.ouro-supply__readout {
+  max-width: min(92%, 14.5rem);
+  padding: 0.55rem 0.65rem 0.5rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.72);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.ouro-supply__live {
+  --ouro-outline: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000, 0 -1.5px 0 #000, 0 1.5px 0 #000, -1.5px 0 0 #000,
+    1.5px 0 0 #000;
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.2rem, 4.8vw, 1.75rem);
+  font-weight: 600;
+  color: #f5a84a;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  -webkit-text-stroke: 0.75px #000;
+  paint-order: stroke fill;
+  text-shadow: var(--ouro-outline), 0 0 14px rgba(255, 150, 60, 0.35);
+}
+
+.ouro-supply__live-sub {
+  --ouro-outline: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+    1px 1px 0 #000;
+  display: block;
+  font-size: clamp(0.65rem, 2.2vw, 0.72rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e8944a;
+  margin-top: 0.4rem;
+  -webkit-text-stroke: 0.5px #000;
+  paint-order: stroke fill;
+  text-shadow: var(--ouro-outline), 0 0 10px rgba(255, 140, 50, 0.25);
+}
+
+.ouro-supply__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ouro-supply__stat {
+  border: 1px solid var(--line);
+  padding: 0.55rem 0.4rem;
+  text-align: center;
+}
+
+.ouro-supply__stat-val {
+  display: block;
+  font-size: 11px;
+  color: var(--fg);
+  margin-top: 0.25rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+.ouro-showcase .ouro-supply__stat-val {
+  font-size: 9px;
+  word-break: break-all;
+}
+
+.ouro-showcase .ouro-supply__readout {
+  max-width: min(94%, 12.5rem);
+  padding: 0.45rem 0.5rem 0.4rem;
+}
+
+.ouro-showcase .ouro-supply__live {
+  font-size: clamp(1rem, 3.6vw, 1.35rem);
+  letter-spacing: -0.03em;
+}
+
+.ouro-supply__stat--eaten .ouro-supply__stat-val {
+  color: var(--accent);
+}
+
+.ouro-supply__loading .ouro-supply__live {
+  color: #d48a40;
+  font-size: clamp(1rem, 4vw, 1.35rem);
+  text-shadow: var(--ouro-outline), 0 0 12px rgba(196, 92, 38, 0.4);
+}
+
+.ouro-supply__loading .ouro-supply__live-sub {
+  color: #c07838;
+  text-shadow: var(--ouro-outline);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-supply,
+  .ouro-supply__serpent {
+    animation: none !important;
+  }
+
+  .ouro-supply__serpent {
+    transform: scale(0.97);
+  }
+}
