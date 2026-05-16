@@ -1,0 +1,204 @@
+/* Playfair Display — local files in /public/fonts/Playfair_Display */
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/fonts/Playfair_Display/PlayfairDisplay-VariableFont_wght.ttf")
+    format("truetype");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/fonts/Playfair_Display/PlayfairDisplay-Italic-VariableFont_wght.ttf")
+    format("truetype");
+  font-weight: 400 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Lore card — tokens live on .ouro__loreCard (scoped) */
+
+.ouro__loreCard {
+  --wurker-ink: #eaf0ff;
+  --wurker-paper: #0b1024b8;
+  --wurker-page: #050712;
+  --wurker-orange: #ffb05a;
+  --wurker-orange-hot: #ffd08a;
+  --wurker-brown: #eaf0ffc7;
+  --wurker-brown-dark: #eaf0ff99;
+  --wurker-stubble: #eaf0ff66;
+  --wurker-green: #00e676;
+  --wurker-green-dark: #00c853;
+  --background: var(--wurker-page);
+  --foreground: #eaf0ff;
+  --accent-navy: #9bb3ffd9;
+  --accent-navy-2: #9bb3ff99;
+  --accent-gold: var(--wurker-orange);
+  --accent-gold-bright: var(--wurker-orange-hot);
+  --accent-gold-subtle: #ffb05a38;
+  --accent-blue: #eaf0ffd1;
+  --accent-blue-bright: #eaf0ffeb;
+  --accent-blue-dark: #eaf0ff9e;
+  --accent-blue-glow: #ffb05a6b;
+  --accent-blue-subtle: #9bb3ff29;
+  --accent-glow: #ffb05a8c;
+  --accent-dim: #ffb05a59;
+  --accent-subtle: #ffb05a24;
+  --accent-green: var(--wurker-green);
+  --accent-red: #c62828;
+  --ouro-bg: #000;
+  --ouro-bg-2: #050505;
+  --ouro-paper: #0a0a0a;
+  --ouro-ink: #f6f6f6;
+  --ouro-ink-2: #cfcfcf;
+  --ouro-dim: #7a7a7a;
+  --ouro-faint: #4a4a4a;
+  --ouro-hair: #ffffff0f;
+  --ouro-hair-2: #ffffff24;
+  --ouro-hair-3: #ffffff47;
+  --ouro-fire: #ff7a1a;
+  --ouro-fire-2: #ffb300;
+  --ouro-pulse: #f6f6f6;
+
+  color: var(--ouro-ink);
+  -webkit-font-smoothing: antialiased;
+  font-family: ui-monospace, "SF Mono", Menlo, Monaco, "Courier New", monospace;
+  font-weight: 400;
+  box-sizing: border-box;
+  margin: 0 auto 2rem;
+  border: 1px solid var(--ouro-hair-2);
+  background: linear-gradient(#ffffff06 0%, #ffffff03 100%);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 720px;
+  padding: 22px 24px 20px;
+  animation: ouro-fade 2.4s 0.75s both;
+  position: relative;
+  overflow: hidden;
+  opacity: 1;
+}
+
+@keyframes ouro-fade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ouro__loreCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 80% at 10% 0%,
+    var(--accent-gold-subtle) 0%,
+    transparent 55%
+  );
+  pointer-events: none;
+}
+
+.ouro__loreCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ouro__loreMark {
+  display: block;
+  font-family: var(--font-space), "Space Grotesk", ui-monospace, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ouro-fire-2);
+  margin-bottom: 14px;
+}
+
+.ouro__loreQuote {
+  margin: 0 0 18px;
+  padding: 0 0 0 14px;
+  border-left: 3px solid var(--ouro-hair-3);
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--ouro-ink);
+}
+
+.ouro__loreQuote em {
+  font-style: italic;
+  color: var(--ouro-fire);
+  font-weight: 600;
+}
+
+.ouro__loreCite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.ouro__loreHandle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-blue-bright);
+  text-decoration: none;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 13px;
+  transition: color 0.15s ease;
+}
+
+.ouro__loreHandle:hover {
+  color: var(--accent-gold-bright);
+}
+
+.ouro__loreAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(
+    135deg,
+    var(--ouro-fire) 0%,
+    var(--wurker-page) 45%,
+    var(--accent-navy) 100%
+  );
+  border: 1px solid var(--ouro-hair-2);
+  box-shadow: 0 0 0 2px var(--accent-gold-subtle);
+}
+
+.ouro__loreHandleTxt {
+  font-weight: 500;
+}
+
+.ouro__loreLinkArrow {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.ouro__loreSep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ouro-faint);
+  flex-shrink: 0;
+}
+
+.ouro__loreSeen {
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--ouro-dim);
+}
+
+.ouro__loreAnswer {
+  margin: 0;
+  font-family: var(--font-space), "Space Grotesk", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ouro-ink-2);
+}
