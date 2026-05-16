@@ -45,7 +45,7 @@ export function SolanaShell() {
         <WalletModalProvider>
           <div className="app-shell">
             <header className="top-bar">
-              <span>eternal cycle</span>
+              <span>feed the cycle</span>
               <div className="top-bar-end">
                 <div className="top-bar-links" aria-label="Community links">
                   <a
