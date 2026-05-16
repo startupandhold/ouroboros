@@ -126,8 +126,7 @@ button {
 .hero-video {
   margin: 0 auto;
   max-width: min(100%, 520px);
-  border: 1px solid var(--line);
-  background: #0a0a0a;
+  background: var(--bg);
   overflow: hidden;
 }
 
