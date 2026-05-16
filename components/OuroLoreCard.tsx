@@ -19,7 +19,7 @@ export function OuroLoreCard() {
           </span>
         </a>
         <span className="ouro__loreSep" aria-hidden="true" />
-        <span className="ouro__loreSeen">46.4K saw it · 119 ❤</span>
+        <span className="ouro__loreSeen">75.4K saw it · 144 ❤</span>
       </div>
     </div>
   );
