@@ -1,9 +1,10 @@
 import { Connection } from "@solana/web3.js";
 import { NextResponse } from "next/server";
-import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
-
-/** Pump.fun genesis UI supply (1B tokens, 6 decimals). */
-export const ORIGINAL_UI_SUPPLY = 1_000_000_000;
+import {
+  DEFAULT_RPC,
+  ORIGINAL_UI_SUPPLY,
+  OUROBOROS_MINT,
+} from "@/lib/constants";
 
 export const revalidate = 45;
 

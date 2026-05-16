@@ -17,6 +17,7 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import bs58 from "bs58";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getHeliusRpcUrl,
@@ -108,11 +109,13 @@ function TokenGlyph(props: { image?: string; symbolGuess: string }) {
   if (image && imgOk) {
     return (
       <span className="token-badge token-badge--media" aria-hidden>
-        <img
+        <Image
           src={image}
           alt=""
-          loading="lazy"
-          decoding="async"
+          width={28}
+          height={28}
+          className="token-badge__img"
+          unoptimized
           onError={() => setImgOk(false)}
         />
       </span>

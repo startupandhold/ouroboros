@@ -5,6 +5,9 @@ export const OUROBOROS_MINT = new PublicKey(
   "2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump",
 );
 
+/** Pump.fun genesis UI supply (1B tokens, 6 decimals). */
+export const ORIGINAL_UI_SUPPLY = 1_000_000_000;
+
 export const DEFAULT_RPC =
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL ??
   "https://api.mainnet-beta.solana.com";

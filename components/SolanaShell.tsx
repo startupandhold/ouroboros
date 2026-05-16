@@ -9,6 +9,7 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
+import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
@@ -55,12 +56,11 @@ export function SolanaShell() {
                     className="top-bar-icon"
                     aria-label="Ouroboros on Pump.fun"
                   >
-                    <img
+                    <Image
                       src="/image/pumpfun_icon.png"
                       alt=""
                       width={20}
                       height={20}
-                      decoding="async"
                       aria-hidden
                     />
                   </a>
@@ -71,12 +71,11 @@ export function SolanaShell() {
                     className="top-bar-icon"
                     aria-label="Ouroboros X community"
                   >
-                    <img
+                    <Image
                       src="/image/x_icon.png"
                       alt=""
                       width={20}
                       height={20}
-                      decoding="async"
                       aria-hidden
                     />
                   </a>
