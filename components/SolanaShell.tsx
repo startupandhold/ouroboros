@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
+import { BurnHistoryPanel } from "@/components/BurnHistoryPanel";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
 import { OuroSupplySerpent } from "@/components/OuroSupplySerpent";
@@ -148,7 +149,8 @@ export function SolanaShell() {
               <OuroSupplySerpent />
             </div>
 
-            <section className="panel">
+            <div className="panel-row">
+              <section className="panel">
               <div className="panel-title-row">
                 <h2 className="panel-title">how the <em>ouroboros</em> feeds</h2>
                 <PanelFeedInfo />
@@ -193,7 +195,10 @@ export function SolanaShell() {
               </ol>
 
               <IncineratorPanel />
-            </section>
+              </section>
+
+              <BurnHistoryPanel />
+            </div>
 
             <p className="disclaimer">
               Experimental interface. Each burn-position row chains Sol Incinerator
