@@ -160,8 +160,7 @@ export function SolanaShell() {
                     use <strong>burn positions</strong> + the USD slider to find
                     small bags, then for each row: Sol Incinerator burn (reclaim
                     rent), Jupiter SOL→OUROBOROS from that reclaimed SOL, then SPL
-                    burn OURO from your ATA (needs <code>SOL_INCINERATOR_API</code>{" "}
-                    for the dust burn + Jupiter-capable wallet).
+                    burn OURO from your ATA.
                   </span>
                 </li>
                 <li>
