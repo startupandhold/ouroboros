@@ -39,7 +39,6 @@ export function OuroSupplySerpent() {
   const [data, setData] = useState<SupplyPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [displaySupply, setDisplaySupply] = useState(ORIGINAL_SUPPLY);
-  const [animDone, setAnimDone] = useState(false);
   const rafRef = useRef<number | null>(null);
   const startedRef = useRef(false);
 
@@ -69,7 +68,6 @@ export function OuroSupplySerpent() {
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setDisplaySupply(target.current);
-      setAnimDone(true);
       return;
     }
 
@@ -85,7 +83,6 @@ export function OuroSupplySerpent() {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         setDisplaySupply(target.current);
-        setAnimDone(true);
       }
     };
 
@@ -132,7 +129,6 @@ export function OuroSupplySerpent() {
           loading={loading}
           error={error}
           eatenPctNow={eatenPctNow}
-          exact={animDone}
         />
       </div>
 
@@ -166,9 +162,8 @@ function SupplyCenter(props: {
   loading: boolean;
   error: string | null;
   eatenPctNow: number;
-  exact?: boolean;
 }) {
-  const { displaySupply, loading, error, eatenPctNow, exact } = props;
+  const { displaySupply, loading, error, eatenPctNow } = props;
   return (
     <div className="ouro-supply__center" aria-live="polite">
       <div className="ouro-supply__readout">
@@ -177,7 +172,7 @@ function SupplyCenter(props: {
             ? "—"
             : loading
               ? "reading chain…"
-              : formatSupply(displaySupply, exact)}
+              : formatSupply(displaySupply)}
         </span>
         <span className="ouro-supply__live-sub">
           {error
