@@ -39,9 +39,9 @@ const serif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Ouroboros Incinerator",
+  title: "Ouroboros Feeder",
   description:
-    "Trash Solana tokens into OUROBOROS via Jupiter, burn supply, reclaim empty accounts.",
+    "Feed Solana tokens into OUROBOROS via Jupiter, burn supply, reclaim empty accounts.",
   icons: {
     icon: "/favicon.ico",
   },
