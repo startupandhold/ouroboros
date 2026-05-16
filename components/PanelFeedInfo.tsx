@@ -93,7 +93,7 @@ function PanelModal(props: { titleId: string; onClose: () => void }) {
           </button>
         </div>
         <p className="panel-modal__body">
-          Using the incinerator below is{" "}
+          Using the feeder below is{" "}
           <strong>entirely optional</strong>. Anyone who wants to help shrink
           circulating OUROBOROS supply can connect a wallet, burn dust tokens or
           close empty accounts, route reclaimed SOL into OURO via Jupiter, and
