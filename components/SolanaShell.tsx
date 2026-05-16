@@ -14,6 +14,11 @@ import { DEFAULT_RPC } from "@/lib/constants";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
 
+const PUMP_COIN_URL =
+  "https://pump.fun/coin/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
+const X_COMMUNITY_URL =
+  "https://x.com/i/communities/2019097621818929284";
+
 export function SolanaShell() {
   const endpoint = useMemo(() => DEFAULT_RPC, []);
   const wallets = useMemo(
@@ -28,11 +33,56 @@ export function SolanaShell() {
           <div className="app-shell">
             <header className="top-bar">
               <span>eternal cycle</span>
-              <span>solana · mainnet</span>
+              <div className="top-bar-end">
+                <div className="top-bar-links" aria-label="Community links">
+                  <a
+                    href={PUMP_COIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="top-bar-icon"
+                    aria-label="Ouroboros on Pump.fun"
+                  >
+                    <img
+                      src="/image/pumpfun_icon.png"
+                      alt=""
+                      width={20}
+                      height={20}
+                      decoding="async"
+                      aria-hidden
+                    />
+                  </a>
+                  <a
+                    href={X_COMMUNITY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="top-bar-icon"
+                    aria-label="Ouroboros X community"
+                  >
+                    <img
+                      src="/image/x_icon.png"
+                      alt=""
+                      width={20}
+                      height={20}
+                      decoding="async"
+                      aria-hidden
+                    />
+                  </a>
+                </div>
+                <span>solana · mainnet</span>
+              </div>
             </header>
 
             <section className="hero">
-              <h1 className="hero-logo">Ouroboros</h1>
+              <h1 className="hero-logo">
+                <a
+                  href={PUMP_COIN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hero-logo-link"
+                >
+                  Ouroboros
+                </a>
+              </h1>
               <p className="hero-tag">the snake eats its tail. forever.</p>
               <div className="hero-video">
                 <video

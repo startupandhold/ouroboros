@@ -56,6 +56,36 @@ button {
   letter-spacing: 0.18em;
   color: var(--muted);
   margin-bottom: 2.5rem;
+  gap: 1rem;
+}
+
+.top-bar-end {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.top-bar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.top-bar-icon {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  opacity: 0.88;
+}
+
+.top-bar-icon:hover {
+  opacity: 1;
+}
+
+.top-bar-icon img {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .hero {
@@ -73,6 +103,16 @@ button {
   -webkit-text-stroke: 1px var(--fg);
   font-style: italic;
   margin: 0 0 0.75rem;
+}
+
+.hero-logo-link {
+  color: inherit;
+  -webkit-text-stroke: inherit;
+}
+
+.hero-logo-link:hover {
+  color: var(--accent);
+  -webkit-text-stroke-color: var(--accent);
 }
 
 .hero-tag {
