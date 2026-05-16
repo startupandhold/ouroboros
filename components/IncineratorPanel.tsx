@@ -67,6 +67,26 @@ function walletKeepLamports(postBalanceLamports: number): number {
   );
 }
 
+/** SOL to route through Jupiter after reclaim, matching single-token burn sizing. */
+function computeSwapLamportsAfterReclaim(params: {
+  preBal: number;
+  postBal: number;
+  lamportsReclaimed?: number;
+}): number {
+  const keep = walletKeepLamports(params.postBal);
+  const spendable = Math.max(0, params.postBal - keep);
+
+  if (
+    typeof params.lamportsReclaimed === "number" &&
+    params.lamportsReclaimed > 0
+  ) {
+    return Math.min(Math.floor(params.lamportsReclaimed * 0.95), spendable);
+  }
+
+  const delta = params.postBal - params.preBal;
+  return Math.min(Math.max(0, delta), spendable);
+}
+
 function base64ToUint8Array(b64: string): Uint8Array {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -519,19 +539,11 @@ export function IncineratorPanel() {
       await waitForSignature(connection, burnSig);
 
       const postBal = await connection.getBalance(publicKey, "confirmed");
-      const keep = walletKeepLamports(postBal);
-      const spendable = Math.max(0, postBal - keep);
-
-      let swapLamports = 0;
-      if (typeof j.lamportsReclaimed === "number" && j.lamportsReclaimed > 0) {
-        swapLamports = Math.min(
-          Math.floor(j.lamportsReclaimed * 0.95),
-          spendable,
-        );
-      } else {
-        const delta = postBal - preBal;
-        swapLamports = Math.min(Math.max(0, delta), spendable);
-      }
+      let swapLamports = computeSwapLamportsAfterReclaim({
+        preBal,
+        postBal,
+        lamportsReclaimed: j.lamportsReclaimed,
+      });
 
       if (swapLamports < MIN_JUPITER_SOL_LAMPORTS) {
         setMessage(
@@ -575,17 +587,17 @@ export function IncineratorPanel() {
   };
 
   const closeEmptiesReclaimBuybackBurn = async () => {
-    if (!publicKey || !sendTransaction || !signTransaction || empties.length === 0)
+    if (!publicKey || !sendTransaction || empties.length === 0) return;
+    if (!signTransaction) {
+      setError("wallet cannot sign (needed for Jupiter after closing shells)");
       return;
+    }
     setBusyKey("close-reclaim-chain");
     setError(null);
     setMessage(null);
 
-    const totalLamportsFromAccounts = empties.reduce((s, e) => s + e.lamports, 0);
-    let closeTxCount = 0;
-    let numBatches = Math.ceil(empties.length / CLOSE_CHUNK);
-
     try {
+      const preBal = await connection.getBalance(publicKey, "confirmed");
       const apiFirst = await fetch("/api/sol-incinerator/batch-close", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -619,9 +631,7 @@ export function IncineratorPanel() {
             skipPreflight: false,
           });
           await waitForSignature(connection, sig);
-          closeTxCount += 1;
         }
-        numBatches = Math.max(1, closeTxCount);
       } else {
         if (!apiFirst.ok) {
           throw new Error(
@@ -637,7 +647,6 @@ export function IncineratorPanel() {
         let page: BatchCloseJson = (await apiFirst.json()) as BatchCloseJson;
         while (true) {
           const txs = page.transactions ?? [];
-          closeTxCount += txs.length;
           for (const raw of txs) {
             const vtx = VersionedTransaction.deserialize(bs58.decode(raw));
             const sig = await sendTransaction(vtx, connection, {
@@ -666,25 +675,25 @@ export function IncineratorPanel() {
           }
           page = (await res.json()) as BatchCloseJson;
         }
-        numBatches = Math.max(1, closeTxCount);
       }
 
-      const postBal = await connection.getBalance(publicKey, "confirmed");
-      const roughCloseFees = 12_000 * numBatches;
-      const reclaimedNet = Math.max(0, totalLamportsFromAccounts - roughCloseFees);
-      const keepLamports = walletKeepLamports(postBal);
-      const fromReclaim = Math.max(
-        0,
-        Math.floor(reclaimedNet * 0.92) - Math.floor(0.01 * LAMPORTS_PER_SOL),
-      );
-      const fromBalance = Math.max(0, postBal - keepLamports);
-      let swapLamports = Math.min(fromReclaim, fromBalance);
+      let postBal = await connection.getBalance(publicKey, "confirmed");
+      let swapLamports = computeSwapLamportsAfterReclaim({ preBal, postBal });
 
       if (swapLamports < MIN_JUPITER_SOL_LAMPORTS) {
+        await new Promise((r) => setTimeout(r, 1200));
+        postBal = await connection.getBalance(publicKey, "confirmed");
+        swapLamports = computeSwapLamportsAfterReclaim({ preBal, postBal });
+      }
+
+      if (swapLamports < MIN_JUPITER_SOL_LAMPORTS) {
+        const deltaSol = Math.max(0, postBal - preBal) / LAMPORTS_PER_SOL;
         setMessage(
-          `closed ${empties.length} empty account(s). reclaimed SOL (~${(
-            totalLamportsFromAccounts / LAMPORTS_PER_SOL
-          ).toFixed(4)} SOL) is below Jupiter minimum swap; buyback skipped.`,
+          `closed ${empties.length} empty account(s). wallet gained ~${deltaSol.toFixed(
+            4,
+          )} SOL — below Jupiter minimum (~${(
+            MIN_JUPITER_SOL_LAMPORTS / LAMPORTS_PER_SOL
+          ).toFixed(4)} SOL); buyback skipped.`,
         );
         await scan();
         return;
