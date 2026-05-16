@@ -88,6 +88,21 @@ button {
   height: 20px;
 }
 
+.top-bar-icon--github {
+  width: 26px;
+  height: 26px;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    #ffffff 0%,
+    #ffffff 38%,
+    rgba(255, 255, 255, 0.72) 58%,
+    rgba(255, 255, 255, 0.2) 78%,
+    transparent 100%
+  );
+}
+
 .hero {
   text-align: center;
   margin-bottom: 3rem;

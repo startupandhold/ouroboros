@@ -84,7 +84,7 @@ export function SolanaShell() {
                     href={GITHUB_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="top-bar-icon"
+                    className="top-bar-icon top-bar-icon--github"
                     aria-label="Ouroboros on GitHub"
                   >
                     <Image
