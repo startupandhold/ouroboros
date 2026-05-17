@@ -17,13 +17,35 @@ export const BURN_HISTORY_STORE_PATH = path.join(
 
 export type BurnPerformedBy = "agent" | "human";
 
+/** Trash token → OURO buyback recorded from the incinerator app. */
+export type OuroBurnExchange = {
+  sourceMint: string;
+  sourceSymbol?: string;
+  sourceName?: string;
+  sourceImage?: string;
+  sourceUiAmount?: number;
+  sourceBurnSignature?: string;
+  swapSignature?: string;
+};
+
 export type OuroBurnEntry = {
   signature: string;
   timestamp: number | null;
   slot: number;
+  /** OUROBOROS burned (UI units). */
   amountUi: number;
   burner: string | null;
   performedBy: BurnPerformedBy;
+  exchange?: OuroBurnExchange;
+};
+
+export type RecordHumanExchangeInput = {
+  signature: string;
+  timestamp?: number | null;
+  slot?: number;
+  amountUi: number;
+  burner: string;
+  exchange: OuroBurnExchange;
 };
 
 export type OuroBurnHistoryStore = {
@@ -173,6 +195,48 @@ export async function writeBurnHistoryStore(
     `${JSON.stringify(store, null, 2)}\n`,
     "utf8",
   );
+}
+
+/** Human app burns with source-token exchange metadata (for “devoured” UI). */
+export function humanExchangeEntries(
+  entries: OuroBurnEntry[],
+  limit = 3,
+): OuroBurnEntry[] {
+  return entries
+    .filter((e) => e.performedBy === "human" && e.exchange?.sourceMint)
+    .slice(0, limit);
+}
+
+export async function appendHumanExchangeEntry(
+  input: RecordHumanExchangeInput,
+): Promise<OuroBurnHistoryStore> {
+  const store = await readBurnHistoryStore();
+  const incoming = normalizeEntry({
+    signature: input.signature.trim(),
+    timestamp: input.timestamp ?? Math.floor(Date.now() / 1000),
+    slot: input.slot ?? 0,
+    amountUi: input.amountUi,
+    burner: input.burner.trim(),
+    performedBy: "human",
+    exchange: {
+      sourceMint: input.exchange.sourceMint.trim(),
+      sourceSymbol: input.exchange.sourceSymbol?.trim() || undefined,
+      sourceName: input.exchange.sourceName?.trim() || undefined,
+      sourceImage: input.exchange.sourceImage?.trim() || undefined,
+      sourceUiAmount: input.exchange.sourceUiAmount,
+      sourceBurnSignature: input.exchange.sourceBurnSignature?.trim(),
+      swapSignature: input.exchange.swapSignature?.trim(),
+    },
+  });
+
+  if (incoming.exchange?.sourceMint === OURO_MINT_STR) {
+    throw new Error("exchange sourceMint cannot be OUROBOROS");
+  }
+
+  const merged = mergeEntries(store.entries, [incoming]);
+  const next: OuroBurnHistoryStore = { ...store, entries: merged };
+  await writeBurnHistoryStore(next);
+  return next;
 }
 
 function usesAgentProgram(item: GtfaFullItem): boolean {
@@ -516,6 +580,7 @@ function mergeEntries(
       timestamp: prev.timestamp ?? e.timestamp,
       burner: prev.burner ?? e.burner,
       performedBy: e.performedBy ?? prev.performedBy,
+      exchange: prev.exchange ?? e.exchange,
     });
   }
   return [...bySig.values()].sort((a, b) => {

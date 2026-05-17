@@ -1,31 +1,41 @@
 import { NextResponse } from "next/server";
 import { getHeliusRpcUrl } from "@/lib/constants";
-import { readBurnHistoryStore } from "@/lib/ouroBurnHistory";
-import { resolveFedMintForSignature, type RecentFeedToken } from "@/lib/ouroFedMint";
+import { humanExchangeEntries, readBurnHistoryStore } from "@/lib/ouroBurnHistory";
 import { fetchTokenMetaByMint } from "@/lib/tokenMetadata";
+import type { RecentFeedToken } from "@/lib/ouroFedMint";
 
 export const dynamic = "force-dynamic";
 
-/** Last 3 OURO burns with the trash-token (or OURO) mint image fed to the snake. */
+/** Last 3 human app exchanges (trash token devoured → OURO buyback) from burn history. */
 export async function GET() {
   try {
     const store = await readBurnHistoryStore();
-    const entries = store.entries.slice(0, 3);
+    const entries = humanExchangeEntries(store.entries, 3);
     const heliusRpc = getHeliusRpcUrl();
 
     const feeds: RecentFeedToken[] = await Promise.all(
       entries.map(async (e) => {
-        const mint = await resolveFedMintForSignature(e.signature);
-        const meta = await fetchTokenMetaByMint(mint, heliusRpc);
+        const ex = e.exchange!;
+        const mint = ex.sourceMint;
+        const hasMeta = Boolean(ex.sourceSymbol || ex.sourceName || ex.sourceImage);
+        const meta = hasMeta
+          ? {
+              symbol: ex.sourceSymbol,
+              name: ex.sourceName,
+              image: ex.sourceImage,
+            }
+          : await fetchTokenMetaByMint(mint, heliusRpc);
         return {
           signature: e.signature,
           timestamp: e.timestamp,
           amountUi: e.amountUi,
-          performedBy: e.performedBy,
+          performedBy: "human" as const,
           mint,
-          symbol: meta.symbol,
-          name: meta.name,
-          image: meta.image,
+          symbol: ex.sourceSymbol ?? meta.symbol,
+          name: ex.sourceName ?? meta.name,
+          image: ex.sourceImage ?? meta.image,
+          sourceUiAmount: ex.sourceUiAmount,
+          ouroBurnedUi: e.amountUi,
         };
       }),
     );

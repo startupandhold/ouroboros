@@ -297,6 +297,49 @@ function ouroBuybackDelta(beforeRaw: bigint, afterRaw: bigint): bigint {
   return delta > BigInt(0) ? delta : BigInt(0);
 }
 
+const HUMAN_FEED_RECORDED = "ouro-human-feed-recorded";
+
+async function txTimingFromSignature(
+  connection: Connection,
+  signature: string,
+): Promise<{ slot: number; timestamp: number | null }> {
+  const tx = await connection.getTransaction(signature, {
+    maxSupportedTransactionVersion: 0,
+    commitment: "confirmed",
+  });
+  return { slot: tx?.slot ?? 0, timestamp: tx?.blockTime ?? null };
+}
+
+async function recordHumanExchange(params: {
+  signature: string;
+  slot: number;
+  timestamp: number | null;
+  amountUi: number;
+  burner: string;
+  exchange: {
+    sourceMint: string;
+    sourceSymbol?: string;
+    sourceName?: string;
+    sourceImage?: string;
+    sourceUiAmount?: number;
+    sourceBurnSignature?: string;
+    swapSignature?: string;
+  };
+}): Promise<void> {
+  try {
+    const res = await fetch("/api/ouro-burn-history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+    if (res.ok) {
+      window.dispatchEvent(new CustomEvent(HUMAN_FEED_RECORDED));
+    }
+  } catch {
+    /* best-effort — on-chain burns still succeeded */
+  }
+}
+
 export function IncineratorPanel() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, signTransaction } = useWallet();
@@ -569,6 +612,24 @@ export function IncineratorPanel() {
             MIN_JUPITER_SOL_LAMPORTS / LAMPORTS_PER_SOL
           ).toFixed(4)} SOL; reclaimed rent was smaller).`,
         );
+        const mintStr = h.mint.toBase58();
+        const m = meta[mintStr];
+        const timing = await txTimingFromSignature(connection, burnSig);
+        await recordHumanExchange({
+          signature: burnSig,
+          slot: timing.slot,
+          timestamp: timing.timestamp,
+          amountUi: 0,
+          burner: publicKey.toBase58(),
+          exchange: {
+            sourceMint: mintStr,
+            sourceSymbol: m?.symbol,
+            sourceName: m?.name,
+            sourceImage: m?.image,
+            sourceUiAmount: h.uiAmount,
+            sourceBurnSignature: burnSig,
+          },
+        });
         await scan();
         return;
       }
@@ -604,6 +665,32 @@ export function IncineratorPanel() {
             ? `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… (buyback burn skipped — rescan)`
             : `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… (existing OURO kept — nothing new to burn)`,
       );
+
+      const mintStr = h.mint.toBase58();
+      const m = meta[mintStr];
+      const primarySig = ouroBurnSig ?? swapSig;
+      const timing = await txTimingFromSignature(connection, primarySig);
+      const ouroBurnedUi =
+        freshOuro && buybackRaw > BigInt(0)
+          ? Number(buybackRaw) / 10 ** freshOuro.decimals
+          : 0;
+      await recordHumanExchange({
+        signature: primarySig,
+        slot: timing.slot,
+        timestamp: timing.timestamp,
+        amountUi: ouroBurnedUi,
+        burner: publicKey.toBase58(),
+        exchange: {
+          sourceMint: mintStr,
+          sourceSymbol: m?.symbol,
+          sourceName: m?.name,
+          sourceImage: m?.image,
+          sourceUiAmount: h.uiAmount,
+          sourceBurnSignature: burnSig,
+          swapSignature: swapSig,
+        },
+      });
+
       await scan();
     } catch (e) {
       setError(e instanceof Error ? e.message : "burn chain failed");

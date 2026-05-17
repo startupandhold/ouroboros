@@ -70,10 +70,14 @@ export async function resolveFedMintForSignature(
 export type RecentFeedToken = {
   signature: string;
   timestamp: number | null;
+  /** OUROBOROS burned from this exchange (UI). */
   amountUi: number;
-  performedBy: "agent" | "human";
+  performedBy: "human";
+  /** Trash / source token mint that was devoured. */
   mint: string;
   symbol?: string;
   name?: string;
   image?: string;
+  sourceUiAmount?: number;
+  ouroBurnedUi?: number;
 };

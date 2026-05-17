@@ -2,15 +2,14 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { OUROBOROS_MINT } from "@/lib/constants";
-
 type FeedToken = {
   signature: string;
   mint: string;
   symbol?: string;
   name?: string;
   image?: string;
-  performedBy: "agent" | "human";
+  sourceUiAmount?: number;
+  ouroBurnedUi?: number;
 };
 
 type FeedsResponse = {
@@ -101,7 +100,12 @@ export function OuroborosFeedAnimation() {
   useEffect(() => {
     void loadFeeds();
     const id = window.setInterval(() => void loadFeeds(), 5 * 60 * 1000);
-    return () => window.clearInterval(id);
+    const onRecorded = () => void loadFeeds();
+    window.addEventListener("ouro-human-feed-recorded", onRecorded);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("ouro-human-feed-recorded", onRecorded);
+    };
   }, [loadFeeds]);
 
   useEffect(() => {
@@ -117,7 +121,6 @@ export function OuroborosFeedAnimation() {
   }, [feeds.length]);
 
   const current = feeds.length > 0 ? feeds[index % feeds.length] : null;
-  const ouroMint = OUROBOROS_MINT.toBase58();
 
   if (feeds.length === 0) {
     return (
@@ -135,7 +138,9 @@ export function OuroborosFeedAnimation() {
             priority
           />
         </div>
-        <p className="ouro-feed-anim__caption">waiting for the first feed…</p>
+        <p className="ouro-feed-anim__caption">
+          waiting for the first human feed via the incinerator…
+        </p>
       </div>
     );
   }
@@ -144,7 +149,7 @@ export function OuroborosFeedAnimation() {
     return (
       <div
         className="ouro-feed-anim ouro-feed-anim--static"
-        aria-label="Last three tokens fed to the ouroboros"
+        aria-label="Last three human-fed tokens devoured by the ouroboros"
       >
         <div className="ouro-feed-anim__stage ouro-feed-anim__stage--static">
           <Image
@@ -178,10 +183,22 @@ export function OuroborosFeedAnimation() {
       <p className="ouro-feed-anim__caption">
         devouring{" "}
         <strong>{current.symbol ?? current.name ?? "token"}</strong>
-        {current.mint === ouroMint ? " · OURO" : ""}
+        {(current.ouroBurnedUi ?? 0) > 0 ? (
+          <>
+            {" "}
+            →{" "}
+            <strong>
+              {(current.ouroBurnedUi ?? 0).toLocaleString(undefined, {
+                maximumFractionDigits: 4,
+              })}{" "}
+              OURO
+            </strong>{" "}
+            burned
+          </>
+        ) : null}
         <span className="ouro-feed-anim__caption-sub">
           {" "}
-          · {index + 1} of {feeds.length} recent feeds
+          · {index + 1} of {feeds.length} human feeds
         </span>
       </p>
     </div>
