@@ -291,6 +291,12 @@ async function readOuroBalance(
   return null;
 }
 
+/** Raw OURO acquired since `beforeRaw` (0 if balance did not increase). */
+function ouroBuybackDelta(beforeRaw: bigint, afterRaw: bigint): bigint {
+  const delta = afterRaw - beforeRaw;
+  return delta > BigInt(0) ? delta : BigInt(0);
+}
+
 export function IncineratorPanel() {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, signTransaction } = useWallet();
@@ -440,8 +446,17 @@ export function IncineratorPanel() {
     saveUsdThreshold(v);
   };
 
-  const burnOuroWithBalance = async (bal: OuroBalance) => {
+  const burnOuroWithBalance = async (
+    bal: OuroBalance,
+    amountRaw?: bigint,
+  ) => {
     if (!publicKey || !sendTransaction) return;
+
+    const toBurn = amountRaw ?? bal.raw;
+    if (toBurn <= BigInt(0)) return;
+    if (toBurn > bal.raw) {
+      throw new Error("burn amount exceeds OURO balance");
+    }
 
     // OUROBOROS is a pump.fun mint. Sol Incinerator burn txs can include pump
     // program instructions whose fee-recipient (or other) accounts lag behind
@@ -457,7 +472,7 @@ export function IncineratorPanel() {
       ata,
       OUROBOROS_MINT,
       publicKey,
-      bal.raw,
+      toBurn,
       [],
       bal.programId,
     );
@@ -560,6 +575,9 @@ export function IncineratorPanel() {
 
       setMessage(`SI burn ok · ${burnSig.slice(0, 8)}… · sign Jupiter SOL→OURO…`);
 
+      const ouroBeforeSwap = await readOuroBalance(connection, publicKey);
+      const ouroBeforeRaw = ouroBeforeSwap?.raw ?? BigInt(0);
+
       const swapSig = await jupiterSwapExactIn({
         inputMint: WRAPPED_SOL_MINT,
         outputMint: ouroMintStr,
@@ -570,16 +588,21 @@ export function IncineratorPanel() {
       });
 
       const freshOuro = await readOuroBalance(connection, publicKey);
+      const buybackRaw = freshOuro
+        ? ouroBuybackDelta(ouroBeforeRaw, freshOuro.raw)
+        : BigInt(0);
       let ouroBurnSig: string | null = null;
-      if (freshOuro && freshOuro.raw > BigInt(0)) {
-        setMessage(`swap ok · ${swapSig.slice(0, 8)}… · sign OURO burn…`);
-        ouroBurnSig = (await burnOuroWithBalance(freshOuro)) ?? null;
+      if (freshOuro && buybackRaw > BigInt(0)) {
+        setMessage(`swap ok · ${swapSig.slice(0, 8)}… · sign buyback OURO burn…`);
+        ouroBurnSig = (await burnOuroWithBalance(freshOuro, buybackRaw)) ?? null;
       }
 
       setMessage(
         ouroBurnSig
-          ? `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… · burned OURO ${ouroBurnSig.slice(0, 8)}…`
-          : `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… (no OURO to burn — rescan)`,
+          ? `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… · burned buyback OURO ${ouroBurnSig.slice(0, 8)}…`
+          : buybackRaw > BigInt(0)
+            ? `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… (buyback burn skipped — rescan)`
+            : `${shortPk(h.mint, 4)} · SI ${burnSig.slice(0, 8)}… · swap ${swapSig.slice(0, 8)}… (existing OURO kept — nothing new to burn)`,
       );
       await scan();
     } catch (e) {
@@ -706,6 +729,9 @@ export function IncineratorPanel() {
         `closed ${empties.length} shell(s). sign Jupiter to buyback OUROBOROS…`,
       );
 
+      const ouroBeforeSwap = await readOuroBalance(connection, publicKey);
+      const ouroBeforeRaw = ouroBeforeSwap?.raw ?? BigInt(0);
+
       const swapSig = await jupiterSwapExactIn({
         inputMint: WRAPPED_SOL_MINT,
         outputMint: ouroMintStr,
@@ -716,16 +742,21 @@ export function IncineratorPanel() {
       });
 
       const freshOuro = await readOuroBalance(connection, publicKey);
+      const buybackRaw = freshOuro
+        ? ouroBuybackDelta(ouroBeforeRaw, freshOuro.raw)
+        : BigInt(0);
       let burnSig: string | null = null;
-      if (freshOuro && freshOuro.raw > BigInt(0)) {
-        setMessage(`swap ok · ${swapSig.slice(0, 8)}… · sign burn…`);
-        burnSig = (await burnOuroWithBalance(freshOuro)) ?? null;
+      if (freshOuro && buybackRaw > BigInt(0)) {
+        setMessage(`swap ok · ${swapSig.slice(0, 8)}… · sign buyback burn…`);
+        burnSig = (await burnOuroWithBalance(freshOuro, buybackRaw)) ?? null;
       }
 
       setMessage(
         burnSig
-          ? `reclaimed → bought OUROBOROS (swap ${swapSig.slice(0, 8)}…) → burned (${burnSig.slice(0, 8)}…)`
-          : `reclaimed → swap ${swapSig.slice(0, 8)}… (no OURO balance to burn yet — rescan)`,
+          ? `reclaimed → bought OUROBOROS (swap ${swapSig.slice(0, 8)}…) → burned buyback (${burnSig.slice(0, 8)}…)`
+          : buybackRaw > BigInt(0)
+            ? `reclaimed → swap ${swapSig.slice(0, 8)}… (buyback burn skipped — rescan)`
+            : `reclaimed → swap ${swapSig.slice(0, 8)}… (existing OURO kept — nothing new to burn)`,
       );
       await scan();
     } catch (e) {
@@ -834,7 +865,7 @@ export function IncineratorPanel() {
               <span style={{ fontSize: 10, color: "var(--muted)" }}>
                 USD from DexScreener (best-effort). each row: Sol Incinerator burn
                 (+ rent reclaim), then Jupiter SOL→OUROBOROS from reclaimed SOL,
-                then burns OURO if any landed.
+                then burns only the buyback OURO (existing wallet balance is kept).
               </span>
             </label>
           </div>
@@ -949,8 +980,8 @@ export function IncineratorPanel() {
                   4,
                 )}{" "}
                 SOL rent (pre-close balances). then: Jupiter wraps and swaps SOL →
-                OUROBOROS, then SPL-burns whatever OURO lands in your ATA (Sol
-                Incinerator is used for batch closes / dust burns when configured).
+                OUROBOROS, then SPL-burns only the buyback amount (Sol Incinerator
+                is used for batch closes / dust burns when configured).
               </span>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                 <button

@@ -615,22 +615,34 @@ export async function refreshBurnHistory(
     force || Date.now() - store.lastFetchedAt >= BURN_HISTORY_REFRESH_MS;
   if (!stale && mode === "incremental") return store;
 
+  /** After historical backfill, `mode: "backfill"` must still fetch new head txs. */
+  const effectiveMode: "backfill" | "incremental" =
+    mode === "backfill" && store.backfillComplete ? "incremental" : mode;
+
   const apiKey = getHeliusApiKey();
   if (!apiKey) {
     log("no Helius API key — skip sync");
     return store;
   }
 
+  if (mode === "backfill" && store.backfillComplete) {
+    log("backfill already complete — syncing newest burns");
+  }
+
   const known = new Set(store.entries.map((e) => e.signature));
   let allEntries = [...store.entries];
   let scanned = 0;
   let chunks = 0;
+  let emptyIncrementalChunks = 0;
   let gtfaToken =
-    mode === "backfill" && store.backfillPaginationToken?.includes(":")
+    effectiveMode === "backfill" &&
+    store.backfillPaginationToken?.includes(":")
       ? store.backfillPaginationToken
       : null;
   let sigBefore =
-    mode === "backfill" && store.backfillPaginationToken && !gtfaToken
+    effectiveMode === "backfill" &&
+    store.backfillPaginationToken &&
+    !gtfaToken
       ? store.backfillPaginationToken
       : undefined;
   let backfillComplete = store.backfillComplete ?? false;
@@ -638,7 +650,7 @@ export async function refreshBurnHistory(
   let gtfaWarned = false;
 
   while (chunks < maxChunks) {
-    if (mode === "backfill" && backfillComplete) break;
+    if (effectiveMode === "backfill" && backfillComplete) break;
 
     let pageBurns: OuroBurnEntry[] = [];
     let chunkScanned = 0;
@@ -646,7 +658,7 @@ export async function refreshBurnHistory(
     if (useGtfa) {
       try {
         const page = await fetchGtfaChunk({
-          sortOrder: mode === "backfill" ? "asc" : "desc",
+          sortOrder: effectiveMode === "backfill" ? "asc" : "desc",
           paginationToken: gtfaToken,
           limit: CHUNK_LIMIT,
         });
@@ -654,8 +666,8 @@ export async function refreshBurnHistory(
         pageBurns = processGtfaPage(page.data, known);
         gtfaToken = page.paginationToken;
 
-        if (mode === "backfill" && !gtfaToken) backfillComplete = true;
-        if (mode === "incremental" && page.data.length === 0) break;
+        if (effectiveMode === "backfill" && !gtfaToken) backfillComplete = true;
+        if (effectiveMode === "incremental" && page.data.length === 0) break;
       } catch (e) {
         if (!isHeliusPlanError(e)) throw e;
         useGtfa = false;
@@ -669,14 +681,18 @@ export async function refreshBurnHistory(
         pageBurns = sigResult.burns;
         chunkScanned = sigResult.scanned;
         sigBefore = sigResult.nextBefore ?? undefined;
-        if (mode === "backfill" && sigResult.reachedDeploy) backfillComplete = true;
+        if (effectiveMode === "backfill" && sigResult.reachedDeploy) {
+          backfillComplete = true;
+        }
       }
     } else {
       const sigResult = await syncChunkViaSignatures(apiKey, known, sigBefore);
       pageBurns = sigResult.burns;
       chunkScanned = sigResult.scanned;
       sigBefore = sigResult.nextBefore ?? undefined;
-      if (mode === "backfill" && sigResult.reachedDeploy) backfillComplete = true;
+      if (effectiveMode === "backfill" && sigResult.reachedDeploy) {
+        backfillComplete = true;
+      }
     }
 
     scanned += chunkScanned;
@@ -685,15 +701,20 @@ export async function refreshBurnHistory(
 
     const cursor = useGtfa ? gtfaToken : sigBefore;
     log(
-      `chunk ${chunks}: scanned ${chunkScanned} txs, +${pageBurns.length} burns (total ${allEntries.length})${backfillComplete ? " — done" : ""}`,
+      `chunk ${chunks}: scanned ${chunkScanned} txs, +${pageBurns.length} burns (total ${allEntries.length})${backfillComplete ? " — backfill done" : ""}`,
     );
 
-    if (mode === "incremental") {
-      if (pageBurns.length === 0 && chunks >= 3) break;
+    if (effectiveMode === "incremental") {
+      if (pageBurns.length === 0) {
+        emptyIncrementalChunks += 1;
+      } else {
+        emptyIncrementalChunks = 0;
+      }
+      if (emptyIncrementalChunks >= 3) break;
       if (!cursor && chunkScanned === 0) break;
     }
 
-    if (mode === "backfill" && backfillComplete) break;
+    if (effectiveMode === "backfill" && backfillComplete) break;
 
     const checkpoint: OuroBurnHistoryStore = {
       mint: OURO_MINT_STR,
@@ -739,5 +760,5 @@ export async function refreshBurnHistoryIfStale(
       maxChunks: force ? 500 : 15,
     });
   }
-  return refreshBurnHistory({ force, mode: "incremental", maxChunks: 3 });
+  return refreshBurnHistory({ force, mode: "incremental", maxChunks: 8 });
 }

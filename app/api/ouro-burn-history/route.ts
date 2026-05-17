@@ -25,7 +25,7 @@ export async function GET() {
         store = await refreshBurnHistory({
           force: false,
           mode: "incremental",
-          maxChunks: 3,
+          maxChunks: 8,
         });
       }
     } catch (e) {
