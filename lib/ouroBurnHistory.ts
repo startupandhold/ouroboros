@@ -614,6 +614,10 @@ export type RefreshBurnHistoryOptions = {
   mode?: "backfill" | "incremental";
   /** Max chunks per run (backfill ignores when resuming until complete). */
   maxChunks?: number;
+  /** Infer trash→OURO exchange metadata for human burns (needs Helius). */
+  enrichExchanges?: boolean;
+  /** Cap exchange enrich per run (0 = all missing). */
+  enrichMaxEntries?: number;
   onProgress?: (msg: string) => void;
 };
 
@@ -668,6 +672,8 @@ export async function refreshBurnHistory(
     force = false,
     mode = "incremental",
     maxChunks = mode === "backfill" ? 500 : 3,
+    enrichExchanges = true,
+    enrichMaxEntries = 0,
     onProgress,
   } = options;
 
@@ -798,7 +804,7 @@ export async function refreshBurnHistory(
     await sleep(CHUNK_DELAY_MS);
   }
 
-  const next: OuroBurnHistoryStore = {
+  let next: OuroBurnHistoryStore = {
     mint: OURO_MINT_STR,
     lastFetchedAt: Date.now(),
     entries: allEntries,
@@ -810,6 +816,15 @@ export async function refreshBurnHistory(
         : (sigBefore ?? null),
     lastScannedCount: scanned,
   };
+
+  if (enrichExchanges && apiKey) {
+    const { enrichHumanExchangeMetadata } = await import("@/lib/ouroExchangeEnrich");
+    next = await enrichHumanExchangeMetadata(next, {
+      onProgress: log,
+      maxEntries: enrichMaxEntries,
+    });
+  }
+
   await writeBurnHistoryStore(next);
   return next;
 }

@@ -17,18 +17,27 @@ async function main() {
   const maxChunks = existing.backfillComplete ? 40 : 500;
 
   console.log(
-    `Syncing OURO burn history (${mode}, max ${maxChunks} chunks)…\n`,
+    `Syncing OURO burn history (${mode}, max ${maxChunks} chunks)…`,
+  );
+  console.log(
+    "Then inferring human trash→OURO exchange metadata where missing.\n",
   );
 
   const store = await refreshBurnHistory({
     force: true,
     mode,
     maxChunks,
+    enrichExchanges: true,
+    enrichMaxEntries: 0,
     onProgress: (msg) => console.log(msg),
   });
 
+  const humanExchanges = store.entries.filter(
+    (e) => e.performedBy === "human" && e.exchange?.sourceMint,
+  ).length;
+
   console.log(
-    `\nDone: ${store.entries.length} burn(s), backfillComplete=${store.backfillComplete}, scanned=${store.lastScannedCount ?? 0}`,
+    `\nDone: ${store.entries.length} burn(s), ${humanExchanges} with exchange metadata, backfillComplete=${store.backfillComplete}, scanned=${store.lastScannedCount ?? 0}`,
   );
 }
 

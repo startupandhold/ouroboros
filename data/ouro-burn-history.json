@@ -1,14 +1,48 @@
 {
   "mint": "2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump",
-  "lastFetchedAt": 1779041488449,
+  "lastFetchedAt": 1779042167228,
   "entries": [
+    {
+      "signature": "5CwoiRZjLT7Uyv9TP9ibCpoDm6ijUBRYMg9SbAYZXiWnCnVL9tAou1dAxMUQBbbXaCx6kdY2bFnTr28HodD83q9s",
+      "timestamp": 1779041857,
+      "slot": 420389036,
+      "amountUi": 1487.207485,
+      "burner": "4tdicF8g1X2uHJWWx8xs79R4bhoPmrgNndGKG7DsYvrr",
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "FLniTfoK5qMNuTY4onkSwhNSoSQv9t2YmYh79as1CRqz",
+        "sourceUiAmount": 451.594693,
+        "sourceBurnSignature": "3Vx22WJN9LfdfqfNjSzyhCdaFKjpxbfZ8kHnu1W9oiKDSjMcCqZCU2F98WYpTzFYmoBNCfaUyc8whQVBEYutNMm3",
+        "swapSignature": "5331cLdurKQj3VhDYL4ZdmcnkUtKM7irow73RXkAbZ9UGQVFsr7kDCybx2LjirtwPCUXCu2vNEDEezVNCYdyUzCB"
+      }
+    },
+    {
+      "signature": "5k7XvScEp11uzwwYY71v7wvLmPf7gMW5ZZT2c717T63Xz2fofemoKA2SiycJoavuTnFDnGmVTCgj7u7t7nmK5vgw",
+      "timestamp": 1779041473,
+      "slot": 420388066,
+      "amountUi": 1465.018757,
+      "burner": "4tdicF8g1X2uHJWWx8xs79R4bhoPmrgNndGKG7DsYvrr",
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "HffhGrF7sxTVeK5nGvwpZX93zn3RNE57rhyLoSscpump",
+        "sourceUiAmount": 14129279.38452,
+        "sourceBurnSignature": "5F1E6BEWzFRiwZS6V4kNgXD3AswynY1bqBoaje7pTx39StEe7sz1rFSCCLA9iiJhkzzDQq5jJC6EcX9VJF3S9yzv",
+        "swapSignature": "2upKgVg4wQFHw2qa9L5SsZBro4oQGRa6WWKHmUSP4ejwS22Y7nB4kGpHXK7cJuyhBsQEJ42ThNqq6VJyLHbJc3eV"
+      }
+    },
     {
       "signature": "GGoj2pzsNrfVRzt3NWkuCuxfrGVwi78RMXaChNprexWk7bdDG2H1Q2qEoLBgX7EFvaZLWRTqGpWgfM3WRZ3h8vf",
       "timestamp": 1779041456,
       "slot": 420388028,
       "amountUi": 1465.051963,
       "burner": "4tdicF8g1X2uHJWWx8xs79R4bhoPmrgNndGKG7DsYvrr",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "HffhGrF7sxTVeK5nGvwpZX93zn3RNE57rhyLoSscpump",
+        "sourceUiAmount": 14129279.38452,
+        "sourceBurnSignature": "5F1E6BEWzFRiwZS6V4kNgXD3AswynY1bqBoaje7pTx39StEe7sz1rFSCCLA9iiJhkzzDQq5jJC6EcX9VJF3S9yzv",
+        "swapSignature": "5NXXvn7PCuPo5PRQzVixJMfdQM9fYMdWh6zTFAxh4rrPXsBZGhFPFQeYQ2izPJLM2Xja8Rt7gdeAnxn4nqFshYzb"
+      }
     },
     {
       "signature": "3mM2EM9Ay1PKi1YXL1HgyjbE7qqm2j64GWrXoUGFxksh54dqBZwbsC8FMx7f9nSacgKNboM8sL4e5RyJD4MV6rFh",
@@ -16,7 +50,13 @@
       "slot": 420386878,
       "amountUi": 1761.78984,
       "burner": "B7iZeeugJDuu3qXqcGvErBtiDs7Zt1parasBqXddPsZP",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "5BHi3hBKcbcZGLUug9ncRG8D3fg6tthoQr73vmqJpump",
+        "sourceUiAmount": 0.000001,
+        "sourceBurnSignature": "3qUbuhidZ42K1prKYJZWuy92qq9qwiouHWoe4VdoVz2AZuSptKmQTMA2Ht9zvZUhupJbBb9J9rqVFiFKshcb8r5c",
+        "swapSignature": "5AT1sCHy5Rz8SxTXT2Md9KnnddG295SQnn6G2mWAgCo1zPG1qKf2xcRQFfNS1M4M3Bdne4rRusyG2CSaJeo7Hkxb"
+      }
     },
     {
       "signature": "3MkTd15EadnY1vrWHQLab6jT552DqyrXghdQJDyeZPKeggUrnfQCJC4bsA94429UpQS4s9NaeKj2Wp3fCmATwKZK",
@@ -24,7 +64,13 @@
       "slot": 420385793,
       "amountUi": 16888.20397,
       "burner": "6HJHrAFjYqF2toBCbN9iyZ5QdG6c4hE3jdL8GN2BPUXD",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "EL8riShm8is1uzsTw9MCqDi2amUWHUpFnwHbxKxpump",
+        "sourceUiAmount": 189220.350256,
+        "sourceBurnSignature": "4QxRGqTc2mLg8pQDSEDStjbffMRNP1LpWT9Z2DhX5rdcoHWva3eEYsazSR7BR8aRbQo5aCYDMBAgDdRufUie7tAr",
+        "swapSignature": "2AbNY142YpbFwesQ5Cj7M1B2K4Ze3M6cfebPMUWAtLZDpH3Eh9QsXJujgH63Ph7rPhspvzSRrjnqWxKTdm7ngoug"
+      }
     },
     {
       "signature": "5abK5op3XCP5GqB2nAATPwtb3p7KStRcqjHc1YwFsS3Gt34g6EYiZkXN7vi2LW4SAPyJ1N3yBKtmUTJQAHXbD56L",
@@ -32,7 +78,13 @@
       "slot": 420385704,
       "amountUi": 801850.795087,
       "burner": "6HJHrAFjYqF2toBCbN9iyZ5QdG6c4hE3jdL8GN2BPUXD",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "EL8riShm8is1uzsTw9MCqDi2amUWHUpFnwHbxKxpump",
+        "sourceUiAmount": 189220.350256,
+        "sourceBurnSignature": "4QxRGqTc2mLg8pQDSEDStjbffMRNP1LpWT9Z2DhX5rdcoHWva3eEYsazSR7BR8aRbQo5aCYDMBAgDdRufUie7tAr",
+        "swapSignature": "5q9PJG3fA4j8kTGK9WFJG1jBaGUNL9FfXYaeYbbqf8jZDNJtsA53j6gsdL8A1jc9j6WEhvF5oN3TL8j1JmGbKGEm"
+      }
     },
     {
       "signature": "2NA1YUUtGbgALFtdvJJBRUwoNWm7DASDr1PurCkXoPRjHDxPNoL11ScLynhukNueduBXUUHPGDR8cbX6kBVreFHM",
@@ -88,7 +140,12 @@
       "slot": 420264707,
       "amountUi": 0.000001,
       "burner": "Bk3dssXLRnVoUx4f3e7i78cP8CF7CsGucy982cTUTXrc",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "7hHeHMkfnxYSMTqVNiV2WZFGz7xqhVmULJHAQcRcpump",
+        "sourceUiAmount": 24354.909279,
+        "sourceBurnSignature": "44nXrbpAG3Yq48kyoW58rCmUQioySytQmbtSBdYW7ZSLpZqS1FR4gPcwmMMWn8pQu6fm2EnPjWfWAWAfhzub5i8j"
+      }
     },
     {
       "signature": "61UfvqoeCKSCNo7g1wzwYSNKAfULpEMZCTHKY5Bt8sHJFWXjBxu7nFhm7y7LNKqivFwRCwdh5qkmYNqFBhEybkqh",
@@ -96,7 +153,12 @@
       "slot": 420200004,
       "amountUi": 0.003453,
       "burner": "B4L8PrGHaHPAdPoDNFbGdoVeLnuNCQXHJPe8tgTiouC",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "2xDCEXU6bW9XwszfZmXEcn6oe9iUzLtaaX7QX2Ycpump",
+        "sourceUiAmount": 12900038.82654,
+        "sourceBurnSignature": "3uLThKmNNHZhWktCGJptr5vzR8NpHXERg9tWYYNGG4fpDTb1etP6bshaqTRdgeVPCZ7tLEWhYw36Vum3Pf3SL4wP"
+      }
     },
     {
       "signature": "4rKGpa3YkFP1Amukc1heUgUvTruQtxqbJpcoFom2snwfjBTyk4k7F1GC5sZ5jpiXgCbAt6XiSsuMcdbUMhTYZygX",
@@ -104,7 +166,13 @@
       "slot": 420165972,
       "amountUi": 21929.108363,
       "burner": "3gMaAGw1M4vrDE5i8tburRJ9e1zFE4MEWPXA19jMjM8P",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "FRxDUAtFF4YQEmeUnHyXz2YT5WLgAFN1712WaDxpump",
+        "sourceUiAmount": 0.6,
+        "sourceBurnSignature": "44DfcmpAnehwYK3xn4EiQEKpX15Vre3BA88gVM9dZnr3MJGfr9By2fhsfphtcXHRiBoAYPcuAFvukeZVZJQmG1wR",
+        "swapSignature": "4xHmqfFJRa6qQXMNuxVLkhNKSmApaw5sXwmU4Coej1SCqARuTjEtx11XZmEgAhChu9GGNgzGS7cR5YkvHdp6mpDd"
+      }
     },
     {
       "signature": "tP8FSxXQ5j2rJqKhZNx7eXG12PYHTPhFQWAtuphHGEThoiKhEZRmXrvbNg6sJD18poqKtAazJh2ypWD17QULFC3",
@@ -112,7 +180,13 @@
       "slot": 420165930,
       "amountUi": 2985.319232,
       "burner": "3gMaAGw1M4vrDE5i8tburRJ9e1zFE4MEWPXA19jMjM8P",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "FRxDUAtFF4YQEmeUnHyXz2YT5WLgAFN1712WaDxpump",
+        "sourceUiAmount": 0.6,
+        "sourceBurnSignature": "44DfcmpAnehwYK3xn4EiQEKpX15Vre3BA88gVM9dZnr3MJGfr9By2fhsfphtcXHRiBoAYPcuAFvukeZVZJQmG1wR",
+        "swapSignature": "3Q9ERDf5yiuwjLdWHruF5RDtvPU2MJoZ7BiBSnLHp2CK3PCJHZhZdAgRstjFC6BdWY4sy7Tin6Y4Jx9sQk2JgqKt"
+      }
     },
     {
       "signature": "y5WipzVsbMWhGHFvTmDyUzqujqv2zjG3vwy94UWYkrdEHFto2B1BeMZrDrjinwJdnTUf6pV2Grc5kJ3E4em6MwK",
@@ -168,7 +242,13 @@
       "slot": 420057977,
       "amountUi": 3109.456305,
       "burner": "DwnLMoDNGuC57SPQdxVhkJojqFj7TbNbgb8eg6gjjmcj",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "EDKvayBUEtNPzh8rzZUFpCMBb1PcsKb2u9iLYPHh6JmB",
+        "sourceUiAmount": 7886535.161879,
+        "sourceBurnSignature": "2iNiNh3aTFB2J8PktVta74CqSDX7pbaKXwgbKdbDbEEe2GKfMzvjNwUYw7RSYH2yAifhipwme11BW2xCCYRzcoUc",
+        "swapSignature": "4Vg4eVLQTgF65xoV5WXpRcX53DJFA3F51V1NcnE4bNKq9d6KTFN19NWRWgpVsi46yk4MkaAHudiLMU8bYqFkTSRS"
+      }
     },
     {
       "signature": "3FEWMYRDK75HvpjKU2UhdGQtD7NSQ6EGaamqxhwtA8LHK4MoT73JuVGAQGLC2CcAEXzYsGuCutRWPkE1Kz6kfHkJ",
@@ -176,7 +256,12 @@
       "slot": 420047262,
       "amountUi": 0.000343,
       "burner": "9wUfoX3tujDVFmye8wnU7QZFmDYN4Um9XCbrH7w854cb",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "HqjGJ1o1kHJQD79QnhMj5qxbFKqhThZhZHjsWQwCpump",
+        "sourceUiAmount": 1151951.45,
+        "sourceBurnSignature": "2u2PpALyaY7i2oNmhj9GNimU4jdoHNCnRJW5wZ5i2DW9y2ENRDSfPCBbmHsNBUySGw35LFhGQvJYLPVxyFKXSv1L"
+      }
     },
     {
       "signature": "4jB3GWDDDYCEkxKCGWjKL7CmsL9rLsVnq8Mce4Z61o43N7aSWHDiy5EBKqmiiu6NPKa35p3FrmQoq8CJRVnVzToe",
@@ -192,7 +277,13 @@
       "slot": 420012758,
       "amountUi": 3757.671827,
       "burner": "DwnLMoDNGuC57SPQdxVhkJojqFj7TbNbgb8eg6gjjmcj",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "HUbf8NZyYQjeCMtGAUyPkR6DGTkZXF3v4hCgnfNhpump",
+        "sourceUiAmount": 30000,
+        "sourceBurnSignature": "5EGQSGxme6peEMb4YgAKbEtJ2kWUZzj8xBgQdrxVEYHhdwAuUEE24xizAaGn7TKUZ8NL8WM7WLm1Qud4EnxHA7je",
+        "swapSignature": "3dZD2GcEuYqncZazwUmQS9VcmZSNG8ZgyzFfp1LMj6CaraoCabqURre226sER3DU1Gx7HwbiddLkrBv4S4vWQ8rc"
+      }
     },
     {
       "signature": "2GVMJutt4CwuGQzwAdmAAUHX6ToiT8dWUaBTh1RRQRaQMuPwE236twXEwnMv8w8M7aHNusimiquCJgj9Ddh1R1QM",
@@ -320,7 +411,13 @@
       "slot": 419972646,
       "amountUi": 79.364288,
       "burner": "94urncUiQeLhuEsWicvRuEi3h7QW1YKdWadZ5TRQRejr",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "6oo2hGUxNzwBbTGVrXdraYt2j3evrRuN9vSBEPaFfomo",
+        "sourceUiAmount": 403253.833785,
+        "sourceBurnSignature": "2w7TuYp9Wcg1GJBZpD5UkZ8jhyTrN6AtYQFsbh2ruGBDhFVzBE8RJdNCeGzxRTUdqnCiYnzc2QnZtibabjZqyw6J",
+        "swapSignature": "3azDnbD2Mfeh2SzwoCHHnpE6J74LtmWbsQf3n9n4P3d71Fe9dfXdSVni7CrgCwtz8P6oXFASHmmhVSL9btvphXDE"
+      }
     },
     {
       "signature": "2SzBRSZtiXLpfoHeyhd2WffikpCu9vK3AvBPenCdv8KueVF5qYfoPQFb2oNApyVx3MVUbyxe7J9W8YEKGY2BgqpE",
@@ -408,7 +505,12 @@
       "slot": 419529602,
       "amountUi": 1,
       "burner": "2pv1A6rCVNd6H1WPun559icxgYxtDz6PeqADFc1aRtie",
-      "performedBy": "human"
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "JDScLShXttkEFeyTuei2bbuAQwAiPg7y2gDPKqY5pump",
+        "sourceUiAmount": 43096.525101,
+        "sourceBurnSignature": "CBLjB85tnv3HR29wuKvGWvXqXfHt3nAoXnsskzfaSRv76zgu3GiBCxB1yByaaE7cgTn11SYw1ogHhFUzCW2dGbp"
+      }
     },
     {
       "signature": "uMKRDaXCmAVvDiW6ZdxRJuxte5E9wsevcxGcwV5cJpEfS3iTyvWiTju6BsQciLYEuZ4iK7ZgSh9WcGCKunJ8SFA",
@@ -2837,5 +2939,5 @@
   ],
   "backfillComplete": true,
   "backfillPaginationToken": null,
-  "lastScannedCount": 800
+  "lastScannedCount": 600
 }

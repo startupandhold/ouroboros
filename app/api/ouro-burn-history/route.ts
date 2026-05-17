@@ -30,6 +30,7 @@ export async function GET() {
           force: false,
           mode: "incremental",
           maxChunks: 8,
+          enrichExchanges: false,
         });
       }
     } catch (e) {
