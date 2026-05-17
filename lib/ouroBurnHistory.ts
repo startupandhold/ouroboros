@@ -1,64 +1,31 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
+import { DEFAULT_RPC } from "@/lib/constants";
+import {
+  readBurnHistoryStore,
+  updateSyncState,
+  upsertBurnEntries,
+} from "@/lib/ouroBurnHistoryDb";
+import {
+  BURN_HISTORY_REFRESH_MS,
+  OURO_DEPLOY_UNIX,
+  OURO_MINT_STR,
+  type OuroBurnEntry,
+  type OuroBurnHistoryStore,
+} from "@/lib/ouroBurnHistoryTypes";
 
-export const OURO_MINT_STR = OUROBOROS_MINT.toBase58();
-export const BURN_HISTORY_REFRESH_MS = 60 * 60 * 1000;
-/** Token deploy — Mar 17, 2026 06:15:39 UTC */
-export const OURO_DEPLOY_UNIX = Math.floor(
-  new Date("2026-03-17T06:15:39Z").getTime() / 1000,
-);
+export {
+  BURN_HISTORY_REFRESH_MS,
+  humanExchangeEntries,
+  normalizeEntry,
+  OURO_DEPLOY_UNIX,
+  OURO_MINT_STR,
+  type BurnPerformedBy,
+  type OuroBurnEntry,
+  type OuroBurnExchange,
+  type OuroBurnHistoryStore,
+  type RecordHumanExchangeInput,
+} from "@/lib/ouroBurnHistoryTypes";
 
-export const BURN_HISTORY_STORE_PATH = path.join(
-  process.cwd(),
-  "data",
-  "ouro-burn-history.json",
-);
-
-export type BurnPerformedBy = "agent" | "human";
-
-/** Trash token → OURO buyback recorded from the incinerator app. */
-export type OuroBurnExchange = {
-  sourceMint: string;
-  sourceSymbol?: string;
-  sourceName?: string;
-  sourceImage?: string;
-  sourceUiAmount?: number;
-  sourceBurnSignature?: string;
-  swapSignature?: string;
-};
-
-export type OuroBurnEntry = {
-  signature: string;
-  timestamp: number | null;
-  slot: number;
-  /** OUROBOROS burned (UI units). */
-  amountUi: number;
-  burner: string | null;
-  performedBy: BurnPerformedBy;
-  exchange?: OuroBurnExchange;
-};
-
-export type RecordHumanExchangeInput = {
-  signature: string;
-  timestamp?: number | null;
-  slot?: number;
-  amountUi: number;
-  burner: string;
-  exchange: OuroBurnExchange;
-};
-
-export type OuroBurnHistoryStore = {
-  lastFetchedAt: number;
-  mint: string;
-  entries: OuroBurnEntry[];
-  /** Ascending backfill from deploy finished. */
-  backfillComplete?: boolean;
-  /** Resume token for chunked backfill (`slot:position`). */
-  backfillPaginationToken?: string | null;
-  /** Txs scanned in last backfill run (debug). */
-  lastScannedCount?: number;
-};
+export { appendHumanExchangeEntry, readBurnHistoryStore } from "@/lib/ouroBurnHistoryDb";
 
 type ParsedIx = {
   programId?: string;
@@ -101,14 +68,6 @@ type GtfaFullItem = {
 type GtfaResult = {
   data: GtfaFullItem[];
   paginationToken: string | null;
-};
-
-const DEFAULT_STORE: OuroBurnHistoryStore = {
-  lastFetchedAt: 0,
-  mint: OURO_MINT_STR,
-  entries: [],
-  backfillComplete: false,
-  backfillPaginationToken: null,
 };
 
 const PUMP_GLOBAL_ACCOUNT = "3GW168i3HxSno6pu2wkJipC5NB3Hb1rVnMgVPqWkpGWt";
@@ -158,85 +117,6 @@ function sleep(ms: number): Promise<void> {
 
 function resolvePubkey(key: string | { pubkey: string }): string {
   return typeof key === "string" ? key : key.pubkey;
-}
-
-export function normalizeEntry(
-  entry: OuroBurnEntry & { performedBy?: BurnPerformedBy },
-): OuroBurnEntry {
-  return {
-    ...entry,
-    performedBy: entry.performedBy ?? "human",
-  };
-}
-
-export async function readBurnHistoryStore(): Promise<OuroBurnHistoryStore> {
-  try {
-    const raw = await fs.readFile(BURN_HISTORY_STORE_PATH, "utf8");
-    const parsed = JSON.parse(raw) as OuroBurnHistoryStore;
-    if (parsed?.mint === OURO_MINT_STR && Array.isArray(parsed.entries)) {
-      return {
-        ...DEFAULT_STORE,
-        ...parsed,
-        entries: parsed.entries.map(normalizeEntry),
-      };
-    }
-  } catch {
-    /* missing */
-  }
-  return { ...DEFAULT_STORE };
-}
-
-export async function writeBurnHistoryStore(
-  store: OuroBurnHistoryStore,
-): Promise<void> {
-  await fs.mkdir(path.dirname(BURN_HISTORY_STORE_PATH), { recursive: true });
-  await fs.writeFile(
-    BURN_HISTORY_STORE_PATH,
-    `${JSON.stringify(store, null, 2)}\n`,
-    "utf8",
-  );
-}
-
-/** Human app burns with source-token exchange metadata (for “devoured” UI). */
-export function humanExchangeEntries(
-  entries: OuroBurnEntry[],
-  limit = 3,
-): OuroBurnEntry[] {
-  return entries
-    .filter((e) => e.performedBy === "human" && e.exchange?.sourceMint)
-    .slice(0, limit);
-}
-
-export async function appendHumanExchangeEntry(
-  input: RecordHumanExchangeInput,
-): Promise<OuroBurnHistoryStore> {
-  const store = await readBurnHistoryStore();
-  const incoming = normalizeEntry({
-    signature: input.signature.trim(),
-    timestamp: input.timestamp ?? Math.floor(Date.now() / 1000),
-    slot: input.slot ?? 0,
-    amountUi: input.amountUi,
-    burner: input.burner.trim(),
-    performedBy: "human",
-    exchange: {
-      sourceMint: input.exchange.sourceMint.trim(),
-      sourceSymbol: input.exchange.sourceSymbol?.trim() || undefined,
-      sourceName: input.exchange.sourceName?.trim() || undefined,
-      sourceImage: input.exchange.sourceImage?.trim() || undefined,
-      sourceUiAmount: input.exchange.sourceUiAmount,
-      sourceBurnSignature: input.exchange.sourceBurnSignature?.trim(),
-      swapSignature: input.exchange.swapSignature?.trim(),
-    },
-  });
-
-  if (incoming.exchange?.sourceMint === OURO_MINT_STR) {
-    throw new Error("exchange sourceMint cannot be OUROBOROS");
-  }
-
-  const merged = mergeEntries(store.entries, [incoming]);
-  const next: OuroBurnHistoryStore = { ...store, entries: merged };
-  await writeBurnHistoryStore(next);
-  return next;
 }
 
 function usesAgentProgram(item: GtfaFullItem): boolean {
@@ -614,10 +494,6 @@ export type RefreshBurnHistoryOptions = {
   mode?: "backfill" | "incremental";
   /** Max chunks per run (backfill ignores when resuming until complete). */
   maxChunks?: number;
-  /** Infer trash→OURO exchange metadata for human burns (needs Helius). */
-  enrichExchanges?: boolean;
-  /** Cap exchange enrich per run (0 = all missing). */
-  enrichMaxEntries?: number;
   onProgress?: (msg: string) => void;
 };
 
@@ -672,8 +548,6 @@ export async function refreshBurnHistory(
     force = false,
     mode = "incremental",
     maxChunks = mode === "backfill" ? 500 : 3,
-    enrichExchanges = true,
-    enrichMaxEntries = 0,
     onProgress,
   } = options;
 
@@ -787,10 +661,12 @@ export async function refreshBurnHistory(
 
     if (effectiveMode === "backfill" && backfillComplete) break;
 
-    const checkpoint: OuroBurnHistoryStore = {
+    if (pageBurns.length > 0) {
+      await upsertBurnEntries(pageBurns);
+    }
+    await updateSyncState({
       mint: OURO_MINT_STR,
       lastFetchedAt: Date.now(),
-      entries: allEntries,
       backfillComplete,
       backfillPaginationToken: backfillComplete
         ? null
@@ -798,16 +674,14 @@ export async function refreshBurnHistory(
           ? gtfaToken
           : (sigBefore ?? null),
       lastScannedCount: scanned,
-    };
-    await writeBurnHistoryStore(checkpoint);
+    });
 
     await sleep(CHUNK_DELAY_MS);
   }
 
-  let next: OuroBurnHistoryStore = {
+  await updateSyncState({
     mint: OURO_MINT_STR,
     lastFetchedAt: Date.now(),
-    entries: allEntries,
     backfillComplete,
     backfillPaginationToken: backfillComplete
       ? null
@@ -815,18 +689,9 @@ export async function refreshBurnHistory(
         ? gtfaToken
         : (sigBefore ?? null),
     lastScannedCount: scanned,
-  };
+  });
 
-  if (enrichExchanges && apiKey) {
-    const { enrichHumanExchangeMetadata } = await import("@/lib/ouroExchangeEnrich");
-    next = await enrichHumanExchangeMetadata(next, {
-      onProgress: log,
-      maxEntries: enrichMaxEntries,
-    });
-  }
-
-  await writeBurnHistoryStore(next);
-  return next;
+  return readBurnHistoryStore();
 }
 
 export async function refreshBurnHistoryIfStale(

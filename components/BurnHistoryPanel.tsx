@@ -111,9 +111,8 @@ export function BurnHistoryPanel() {
       </div>
 
       <p className="burn-history__hint">
-        burns since Mar 17 2026 from <code>data/ouro-burn-history.json</code>{" "}
-        (Helius <code>getTransactionsForAddress</code>, chunked). human = via
-        this app.
+        burns since Mar 17 2026 from Neon (Helius chain sync + app-recorded
+        exchanges). human = via this app.
         {data?.backfillComplete === false ? (
           <>
             {" "}
@@ -138,10 +137,10 @@ export function BurnHistoryPanel() {
         ) : entries.length === 0 ? (
           <li className="burn-history__empty">
             {data?.syncEnabled === false
-              ? "no burns in data/ouro-burn-history.json yet — run npm run sync:burn-history (needs HELIUS_API_KEY)."
+              ? "no burns in the database yet — set NEON_DB_URL and run npm run sync:burn-history (needs HELIUS_API_KEY)."
               : data?.lastFetchedAt
-                ? "no burns in the history file yet."
-                : "run npm run sync:burn-history to populate the history file."}
+                ? "no burns in the database yet."
+                : "run npm run sync:burn-history to index on-chain burns."}
           </li>
         ) : (
           pageEntries.map((e) => (
@@ -216,7 +215,7 @@ export function BurnHistoryPanel() {
       ) : null}
 
       <p className="burn-history__footer">
-        file updated {formatRefreshed(data?.lastFetchedAt ?? 0)}
+        chain sync {formatRefreshed(data?.lastFetchedAt ?? 0)}
         {error && entries.length > 0 ? ` · sync: ${error}` : ""}
       </p>
     </aside>

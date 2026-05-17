@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { appendHumanExchangeEntry } from "@/lib/ouroBurnHistoryDb";
 import {
-  appendHumanExchangeEntry,
   BURN_HISTORY_REFRESH_MS,
   getHeliusApiKey,
   OURO_MINT_STR,
@@ -12,7 +12,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-/** Serves burns from `data/ouro-burn-history.json`; optional light chain sync. */
+/** Serves burns from Neon; optional incremental on-chain sync (no exchange inference). */
 export async function GET() {
   const syncEnabled = Boolean(getHeliusApiKey());
   let store = await readBurnHistoryStore();
@@ -30,7 +30,6 @@ export async function GET() {
           force: false,
           mode: "incremental",
           maxChunks: 8,
-          enrichExchanges: false,
         });
       }
     } catch (e) {
@@ -79,7 +78,7 @@ function parseExchange(raw: unknown): OuroBurnExchange | null {
   return exchange;
 }
 
-/** Record a human incinerator exchange (trash token → OURO buyback) in the JSON store. */
+/** Record a human incinerator exchange (trash token → OURO buyback) in Neon. */
 export async function POST(req: Request) {
   let body: unknown;
   try {

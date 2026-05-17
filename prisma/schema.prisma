@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEON_DB_URL")
+}
+
+enum BurnPerformedBy {
+  agent
+  human
+}
+
+/// On-chain OURO burn (agent or human). Human app burns include trash-token exchange fields.
+model OuroBurn {
+  signature           String          @id
+  timestamp           Int?
+  slot                Int             @default(0)
+  amountUi            Float
+  burner              String?
+  performedBy         BurnPerformedBy @default(human)
+  sourceMint          String?
+  sourceSymbol        String?
+  sourceName          String?
+  sourceImage         String?
+  sourceUiAmount      Float?
+  sourceBurnSignature String?
+  swapSignature       String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([timestamp(sort: Desc)])
+  @@index([performedBy])
+  @@index([sourceMint])
+}
+
+/// Chain sync cursor for Helius backfill / incremental indexing.
+model BurnHistorySyncState {
+  id                      String  @id @default("default")
+  mint                    String
+  lastFetchedAt           BigInt  @default(0)
+  backfillComplete        Boolean @default(false)
+  backfillPaginationToken String?
+  lastScannedCount        Int?
+}

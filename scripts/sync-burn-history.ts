@@ -1,15 +1,12 @@
 /**
- * Backfill burn history from OURO deploy → now.
- * Progress is checkpointed to data/ouro-burn-history.json every chunk.
+ * Backfill / incremental sync of on-chain OURO burns into Neon (Helius).
+ * Human trash→OURO exchange metadata is recorded by the app via POST /api/ouro-burn-history.
  */
 import { loadProjectEnv } from "../lib/loadEnv";
 
 loadProjectEnv();
 
-import {
-  readBurnHistoryStore,
-  refreshBurnHistory,
-} from "../lib/ouroBurnHistory";
+import { readBurnHistoryStore, refreshBurnHistory } from "../lib/ouroBurnHistory";
 
 async function main() {
   const existing = await readBurnHistoryStore();
@@ -17,18 +14,13 @@ async function main() {
   const maxChunks = existing.backfillComplete ? 40 : 500;
 
   console.log(
-    `Syncing OURO burn history (${mode}, max ${maxChunks} chunks)…`,
-  );
-  console.log(
-    "Then inferring human trash→OURO exchange metadata where missing.\n",
+    `Syncing OURO burn history to Neon (${mode}, max ${maxChunks} chunks)…\n`,
   );
 
   const store = await refreshBurnHistory({
     force: true,
     mode,
     maxChunks,
-    enrichExchanges: true,
-    enrichMaxEntries: 0,
     onProgress: (msg) => console.log(msg),
   });
 
@@ -37,7 +29,7 @@ async function main() {
   ).length;
 
   console.log(
-    `\nDone: ${store.entries.length} burn(s), ${humanExchanges} with exchange metadata, backfillComplete=${store.backfillComplete}, scanned=${store.lastScannedCount ?? 0}`,
+    `\nDone: ${store.entries.length} burn(s), ${humanExchanges} with exchange metadata (from app POST), backfillComplete=${store.backfillComplete}, scanned=${store.lastScannedCount ?? 0}`,
   );
 }
 
