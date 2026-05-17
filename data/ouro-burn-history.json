@@ -1,7 +1,63 @@
 {
   "mint": "2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump",
-  "lastFetchedAt": 1779042167228,
+  "lastFetchedAt": 1779044353295,
   "entries": [
+    {
+      "signature": "2TC1fVEsedB9JG3xe4sizeK1AGKTmK9C2dhuaQPT5vN3hEGpdtyfAn1NQUJ1dcF8kRWYzcsZ7QaL5snV1CueJAec",
+      "timestamp": 1779044267,
+      "slot": 420395069,
+      "amountUi": 1598.544253,
+      "burner": "GqcAvy9NXw7CCTjVxEZmqvHJhbYkoP2HhMMPfXfRGFJ",
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "CjyEcZX86WxD5BQGkLDF714wcxbn7SazjTDxUufrWCPC",
+        "sourceUiAmount": 109413820.263619,
+        "sourceBurnSignature": "3LiWVtAH3oLViWhqwMeksBS1Q3XJAafvkgWZG7eoVi417LcjH4h6iDFhM9FZLMJ626AtCos5oK2ArBZd7mjzNARu",
+        "swapSignature": "4ZrWtNC6N6iKDHZtKsaRyZLsujQFavNRzLYtpr3kTFEBs4yMFTNSXPqa1tneCy4hRoULUr5Kv8bJT23TDuY9cavJ"
+      }
+    },
+    {
+      "signature": "66q85HBmrmcETVaW6Rz2eAUHikThScfcdhxbbzmfjAcgjkFUD8yhFX6pBkbg1PJobGgnBRYY5LCnj3Mf6o9ZybeW",
+      "timestamp": 1779044246,
+      "slot": 420395017,
+      "amountUi": 1598.581779,
+      "burner": "GqcAvy9NXw7CCTjVxEZmqvHJhbYkoP2HhMMPfXfRGFJ",
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "CjyEcZX86WxD5BQGkLDF714wcxbn7SazjTDxUufrWCPC",
+        "sourceUiAmount": 109413820.263619,
+        "sourceBurnSignature": "3LiWVtAH3oLViWhqwMeksBS1Q3XJAafvkgWZG7eoVi417LcjH4h6iDFhM9FZLMJ626AtCos5oK2ArBZd7mjzNARu",
+        "swapSignature": "4GhhZeoYoTPNp72KDxejmu8JtQhkDdXfzyAT7ezzr83EbUAsrJ31BmXdn7HK6X8PJHAsM7sD4UJ1X3m1uiGdekUo"
+      }
+    },
+    {
+      "signature": "3rmUuSkkMF6ARbRpYWripg8LqvWecCe6D96Q8nA4mSfdBj2i81NCNZGXoG44v1GZwuhGcrxQuf2btJfZBE3XG5N4",
+      "timestamp": 1779044233,
+      "slot": 420394983,
+      "amountUi": 1596.765644,
+      "burner": "GqcAvy9NXw7CCTjVxEZmqvHJhbYkoP2HhMMPfXfRGFJ",
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "CjyEcZX86WxD5BQGkLDF714wcxbn7SazjTDxUufrWCPC",
+        "sourceUiAmount": 109413820.263619,
+        "sourceBurnSignature": "3LiWVtAH3oLViWhqwMeksBS1Q3XJAafvkgWZG7eoVi417LcjH4h6iDFhM9FZLMJ626AtCos5oK2ArBZd7mjzNARu",
+        "swapSignature": "4hcjLZDDT4VtsVkoLYTEwXCYdAiF9CtjwzKN2SgsKL8fynN1V8NtQfjpjpN4rnVwVVuVAvZmD8rgz9n8bRQ8pTF6"
+      }
+    },
+    {
+      "signature": "2CWnuEHc2AGaUAX1LMYdRCJTtJiUwmjTdfCuFH2vG3sqqqEoSbgrxrvvXS2xMRXQNSweZY9DPcakKageCC1ycDcv",
+      "timestamp": 1779044211,
+      "slot": 420394929,
+      "amountUi": 1596.803107,
+      "burner": "GqcAvy9NXw7CCTjVxEZmqvHJhbYkoP2HhMMPfXfRGFJ",
+      "performedBy": "human",
+      "exchange": {
+        "sourceMint": "CjyEcZX86WxD5BQGkLDF714wcxbn7SazjTDxUufrWCPC",
+        "sourceUiAmount": 109413820.263619,
+        "sourceBurnSignature": "3LiWVtAH3oLViWhqwMeksBS1Q3XJAafvkgWZG7eoVi417LcjH4h6iDFhM9FZLMJ626AtCos5oK2ArBZd7mjzNARu",
+        "swapSignature": "2BTVVnA18aGNdtRN8XD9SLbkS9EL18dSnLmc1NrtcvDu4Cwq7vnZ3WuBaouzbGqHUEBjKcg7BDT3iP9xWawqF3vE"
+      }
+    },
     {
       "signature": "5CwoiRZjLT7Uyv9TP9ibCpoDm6ijUBRYMg9SbAYZXiWnCnVL9tAou1dAxMUQBbbXaCx6kdY2bFnTr28HodD83q9s",
       "timestamp": 1779041857,
@@ -2939,5 +2995,5 @@
   ],
   "backfillComplete": true,
   "backfillPaginationToken": null,
-  "lastScannedCount": 600
+  "lastScannedCount": 800
 }
