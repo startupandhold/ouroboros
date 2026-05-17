@@ -165,3 +165,16 @@ export async function fetchTokenDisplayMeta(
   mergeMeta(out, await fetchJupiterTokenMeta(mint));
   return out;
 }
+
+/** Mint-only metadata (Jupiter + optional Helius DAS). */
+export async function fetchTokenMetaByMint(
+  mint: string,
+  heliusRpcUrl: string | null = null,
+): Promise<TokenDisplayMeta> {
+  const out: TokenDisplayMeta = {};
+  if (heliusRpcUrl) {
+    mergeMeta(out, await fetchHeliusDasAsset(heliusRpcUrl, mint));
+  }
+  mergeMeta(out, await fetchJupiterTokenMeta(mint));
+  return out;
+}

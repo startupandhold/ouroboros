@@ -598,6 +598,176 @@ button {
   min-width: 1.5rem;
 }
 
+.ouro-feed-anim {
+  margin: 0 0 1.1rem;
+  padding: 0.85rem 0 0.65rem;
+  border-top: 1px solid var(--line);
+}
+
+.ouro-feed-anim__stage {
+  position: relative;
+  height: 7.5rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ouro-feed-anim__serpent {
+  width: auto;
+  height: 6.5rem;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 0 18px rgba(196, 92, 38, 0.15));
+  transition: transform 0.35s ease;
+  z-index: 1;
+}
+
+.ouro-feed-anim__serpent--gulp {
+  transform: scale(1.04);
+}
+
+.ouro-feed-anim__prey {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ouro-feed-anim__prey--placeholder {
+  display: none;
+}
+
+.ouro-feed-anim__prey-orbit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #0a0a0a;
+  box-shadow: 0 0 20px rgba(196, 92, 38, 0.25);
+  transform: translateX(115%);
+  opacity: 0;
+  animation: ouro-feed-cycle 2.8s ease-in-out forwards;
+}
+
+.ouro-feed-anim__prey-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.ouro-feed-anim__prey-fallback {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.ouro-feed-anim__caption {
+  margin: 0.45rem 0 0;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+}
+
+.ouro-feed-anim__caption strong {
+  color: var(--fg);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.ouro-feed-anim__caption-sub {
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.ouro-feed-anim--empty .ouro-feed-anim__stage {
+  height: 5.5rem;
+}
+
+.ouro-feed-anim__stage--static {
+  flex-direction: row;
+  gap: 0.75rem;
+  height: auto;
+  min-height: 5rem;
+  padding: 0.25rem 0;
+}
+
+.ouro-feed-anim__stage--static .ouro-feed-anim__serpent {
+  height: 4.5rem;
+}
+
+.ouro-feed-anim--static .ouro-feed-anim__static-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.ouro-feed-anim__chip {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+}
+
+.ouro-feed-anim__chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ouro-feed-anim__chip-fallback {
+  font-size: 9px;
+  color: var(--accent);
+}
+
+@keyframes ouro-feed-cycle {
+  0% {
+    transform: translateX(115%) scale(0.85);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  48% {
+    transform: translateX(18%) scale(1);
+    opacity: 1;
+  }
+  58% {
+    transform: translateX(18%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-6%) scale(0.12);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-feed-anim__prey-orbit {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
 .wallet-row {
   display: flex;
   flex-wrap: wrap;

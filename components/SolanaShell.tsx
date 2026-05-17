@@ -16,6 +16,7 @@ import { BurnHistoryPanel } from "@/components/BurnHistoryPanel";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
 import { OuroSupplySerpent } from "@/components/OuroSupplySerpent";
+import { OuroborosFeedAnimation } from "@/components/OuroborosFeedAnimation";
 import { PanelFeedInfo } from "@/components/PanelFeedInfo";
 
 const PUMP_COIN_URL =
@@ -152,7 +153,7 @@ export function SolanaShell() {
             <div className="panel-row">
               <section className="panel">
               <div className="panel-title-row">
-                <h2 className="panel-title">how the <em>ouroboros</em> feeds</h2>
+                <h2 className="panel-title">feed the <em>ouroboros</em></h2>
                 <PanelFeedInfo />
               </div>
               <ol className="steps">
@@ -193,6 +194,8 @@ export function SolanaShell() {
                   </span>
                 </li>
               </ol>
+
+              <OuroborosFeedAnimation />
 
               <IncineratorPanel />
               </section>
