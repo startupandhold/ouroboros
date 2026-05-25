@@ -24,7 +24,17 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
+}
+
+.ouro-supply__label-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.ouro-supply__label-link:hover {
+  color: var(--fg);
 }
 
 .ouro-supply__ring {

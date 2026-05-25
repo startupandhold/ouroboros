@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { OUROBOROS_MINT } from "@/lib/constants";
 
 const ORIGINAL_SUPPLY = 1_000_000_000;
 const ANIM_MS = 5200;
@@ -107,7 +108,17 @@ export function OuroSupplySerpent() {
       className={`ouro-supply${loading ? " ouro-supply__loading" : ""}`}
       aria-label="Ouroboros supply consumed"
     >
-      <span className="ouro-supply__label">the snake eats its supply</span>
+      <p className="ouro-supply__label">
+        the snake eats its supply{" "}
+        <a
+          href={`https://solscan.io/token/${OUROBOROS_MINT.toBase58()}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ouro-supply__label-link"
+        >
+          solscan
+        </a>
+      </p>
 
       <div className="ouro-supply__ring">
         <div
