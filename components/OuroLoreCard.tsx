@@ -1,7 +1,7 @@
 export function OuroLoreCard() {
   return (
     <div className="ouro__loreCard">
-      <span className="ouro__loreMark">∞ origin · 15 may 2026</span>
+      <span className="ouro__loreMark">∞ origin · 16 march 2026</span>
       <blockquote className="ouro__loreQuote">
         “wow we really are eating ourselves”
       </blockquote>
