@@ -17,6 +17,47 @@
   color: var(--accent);
 }
 
+.ouro-snake__round-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0 0 0.35rem;
+  padding: 0.85rem 0.75rem 1rem;
+  border: 1px solid rgba(196, 92, 38, 0.35);
+  border-radius: 10px;
+  background: linear-gradient(
+    180deg,
+    rgba(196, 92, 38, 0.14) 0%,
+    rgba(196, 92, 38, 0.04) 100%
+  );
+  text-align: center;
+}
+
+.ouro-snake__round-score-label {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ouro-snake__round-score-value {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2.4rem, 8vw, 3rem);
+  line-height: 1;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  text-shadow: 0 0 24px rgba(196, 92, 38, 0.35);
+}
+
+.ouro-snake__round-score-unit {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(196, 92, 38, 0.85);
+}
+
 .ouro-snake__top-end {
   display: flex;
   align-items: center;

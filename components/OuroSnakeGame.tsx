@@ -1163,7 +1163,6 @@ export function OuroSnakeGame() {
         <Link href="/">← back</Link>
         <span>ouroboros snake</span>
         <div className="ouro-snake__top-end">
-          <span className="ouro-snake__score">{score} pts</span>
           {walletUiReady && (
             <WalletMultiButton className="ouro-snake__wallet-btn" />
           )}
@@ -1455,6 +1454,11 @@ export function OuroSnakeGame() {
         </div>
 
         <aside className="ouro-snake__hud panel">
+          <div className="ouro-snake__round-score" aria-live="polite">
+            <span className="ouro-snake__round-score-label">This round</span>
+            <span className="ouro-snake__round-score-value">{score}</span>
+            <span className="ouro-snake__round-score-unit">pts</span>
+          </div>
           <div className="ouro-snake__stat">
             <span className="ouro-snake__stat-label">Tokens eaten</span>
             <span className="ouro-snake__stat-value">{tokensEaten}</span>
