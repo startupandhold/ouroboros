@@ -59,6 +59,54 @@ button {
   gap: 1rem;
 }
 
+.top-bar-start {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.top-bar-game-link {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  opacity: 0.92;
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.top-bar-game-link:hover {
+  opacity: 1;
+  color: inherit;
+}
+
+.top-bar-game-link__img {
+  display: block;
+  width: auto;
+  height: 22px;
+  object-fit: contain;
+  animation: top-bar-ouro-contract 3.5s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+.top-bar-game-link:hover .top-bar-game-link__img {
+  filter: drop-shadow(0 0 6px rgba(196, 92, 38, 0.55));
+}
+
+@keyframes top-bar-ouro-contract {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-bar-game-link__img {
+    animation: none;
+  }
+}
+
 .top-bar-end {
   display: flex;
   align-items: center;

@@ -10,6 +10,7 @@ import {
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
 import { BurnHistoryPanel } from "@/components/BurnHistoryPanel";
@@ -50,7 +51,24 @@ export function SolanaShell() {
         <WalletModalProvider>
           <div className="app-shell">
             <header className="top-bar">
-              <span>feed the cycle</span>
+              <div className="top-bar-start">
+                <span>feed the cycle</span>
+                <Link
+                  href="/game"
+                  className="top-bar-game-link"
+                  aria-label="Play Ouroboros Snake"
+                  title="Play Ouroboros Snake"
+                >
+                  <Image
+                    src="/image/ouro_infinite.png"
+                    alt=""
+                    width={40}
+                    height={22}
+                    className="top-bar-game-link__img"
+                    aria-hidden
+                  />
+                </Link>
+              </div>
               <div className="top-bar-end">
                 <div className="top-bar-links" aria-label="Community links">
                   <a
