@@ -600,13 +600,53 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(40, 20, 80, 0.95) 0%,
-    rgba(10, 5, 20, 0.98) 70%
+    rgba(110, 45, 190, 0.96) 0%,
+    rgba(55, 15, 110, 0.94) 45%,
+    rgba(18, 5, 38, 0.98) 100%
   );
-  box-shadow: inset 0 0 0 1px rgba(120, 80, 200, 0.35);
+  box-shadow:
+    inset 0 0 0 2px rgba(190, 110, 255, 0.85),
+    inset 0 0 14px rgba(120, 50, 220, 0.55),
+    0 0 10px rgba(140, 60, 255, 0.45);
   animation: ouro-snake-void-pulse 1.4s ease-in-out infinite;
+}
+
+.ouro-snake__void::before,
+.ouro-snake__void::after {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  pointer-events: none;
+}
+
+.ouro-snake__void::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(180, 100, 255, 0) 0deg 24deg,
+    rgba(180, 100, 255, 0.42) 24deg 42deg,
+    rgba(120, 50, 220, 0.28) 42deg 58deg,
+    rgba(180, 100, 255, 0) 58deg 90deg
+  );
+  animation: ouro-snake-void-swirl 3.6s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.ouro-snake__void::after {
+  inset: 10%;
+  background: conic-gradient(
+    from 180deg,
+    transparent 0deg,
+    rgba(220, 150, 255, 0.35) 70deg,
+    transparent 140deg,
+    rgba(90, 30, 180, 0.4) 220deg,
+    transparent 300deg
+  );
+  animation: ouro-snake-void-swirl 2.4s linear infinite reverse;
+  mix-blend-mode: soft-light;
 }
 
 .ouro-snake__void--warning {
@@ -616,9 +656,19 @@
     rgba(90, 60, 5, 0.96) 70%
   );
   box-shadow:
-    inset 0 0 0 1px rgba(255, 220, 80, 0.55),
+    inset 0 0 0 2px rgba(255, 220, 80, 0.75),
     0 0 10px rgba(255, 200, 40, 0.35);
   animation: ouro-snake-void-warn 0.55s ease-in-out infinite;
+}
+
+.ouro-snake__void--warning::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 220, 80, 0) 0deg 24deg,
+    rgba(255, 220, 80, 0.38) 24deg 42deg,
+    rgba(255, 180, 40, 0.25) 42deg 58deg,
+    rgba(255, 220, 80, 0) 58deg 90deg
+  );
 }
 
 .ouro-snake__void--critical {
@@ -628,30 +678,61 @@
     rgba(80, 5, 5, 0.98) 70%
   );
   box-shadow:
-    inset 0 0 0 1px rgba(255, 100, 100, 0.75),
+    inset 0 0 0 2px rgba(255, 100, 100, 0.85),
     0 0 14px rgba(255, 40, 40, 0.55);
   animation: ouro-snake-void-critical 0.28s ease-in-out infinite;
 }
 
+.ouro-snake__void--critical::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 100, 100, 0) 0deg 20deg,
+    rgba(255, 100, 100, 0.45) 20deg 36deg,
+    rgba(255, 40, 40, 0.3) 36deg 52deg,
+    rgba(255, 100, 100, 0) 52deg 80deg
+  );
+  animation-duration: 1.6s;
+}
+
 .ouro-snake__cell--void-normal {
-  background: rgba(30, 10, 50, 0.22);
+  background: rgba(65, 22, 110, 0.52);
+  border-color: rgba(170, 90, 255, 0.95);
+  box-shadow:
+    inset 0 0 0 1px rgba(210, 130, 255, 0.55),
+    0 0 8px rgba(130, 60, 230, 0.5);
 }
 
 .ouro-snake__cell--void-warning {
-  background: rgba(120, 90, 10, 0.18);
+  background: rgba(120, 90, 10, 0.28);
+  border-color: rgba(255, 210, 60, 0.85);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 230, 120, 0.45),
+    0 0 8px rgba(255, 180, 40, 0.35);
 }
 
 .ouro-snake__cell--void-critical {
-  background: rgba(120, 10, 10, 0.22);
+  background: rgba(120, 10, 10, 0.32);
+  border-color: rgba(255, 90, 90, 0.9);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 130, 130, 0.5),
+    0 0 10px rgba(255, 40, 40, 0.45);
+}
+
+@keyframes ouro-snake-void-swirl {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes ouro-snake-void-pulse {
   0%,
   100% {
-    opacity: 0.88;
+    opacity: 0.92;
+    filter: brightness(0.96);
   }
   50% {
     opacity: 1;
+    filter: brightness(1.08);
   }
 }
 
@@ -937,7 +1018,9 @@
   .ouro-snake__token--despawn,
   .ouro-snake__void,
   .ouro-snake__void--warning,
-  .ouro-snake__void--critical {
+  .ouro-snake__void--critical,
+  .ouro-snake__void::before,
+  .ouro-snake__void::after {
     animation: none;
   }
 
