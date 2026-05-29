@@ -1468,6 +1468,41 @@ export function OuroSnakeGame() {
           </div>
         </div>
 
+        <div className="ouro-snake__dpad" aria-label="Direction controls">
+          <button
+            type="button"
+            className="ouro-snake__pad ouro-snake__pad--up"
+            aria-label="Up"
+            onClick={() => handlePad("up")}
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            className="ouro-snake__pad ouro-snake__pad--left"
+            aria-label="Left"
+            onClick={() => handlePad("left")}
+          >
+            ◀
+          </button>
+          <button
+            type="button"
+            className="ouro-snake__pad ouro-snake__pad--down"
+            aria-label="Down"
+            onClick={() => handlePad("down")}
+          >
+            ▼
+          </button>
+          <button
+            type="button"
+            className="ouro-snake__pad ouro-snake__pad--right"
+            aria-label="Right"
+            onClick={() => handlePad("right")}
+          >
+            ▶
+          </button>
+        </div>
+
         <aside className="ouro-snake__hud panel">
           <div className="ouro-snake__round-score" aria-live="polite">
             <span className="ouro-snake__round-score-label">This round</span>
@@ -1554,41 +1589,6 @@ export function OuroSnakeGame() {
             {MAX_OURO_TOKENS} ouroboros
           </p>
         </aside>
-      </div>
-
-      <div className="ouro-snake__dpad" aria-label="Direction controls">
-        <button
-          type="button"
-          className="ouro-snake__pad ouro-snake__pad--up"
-          aria-label="Up"
-          onClick={() => handlePad("up")}
-        >
-          ▲
-        </button>
-        <button
-          type="button"
-          className="ouro-snake__pad ouro-snake__pad--left"
-          aria-label="Left"
-          onClick={() => handlePad("left")}
-        >
-          ◀
-        </button>
-        <button
-          type="button"
-          className="ouro-snake__pad ouro-snake__pad--down"
-          aria-label="Down"
-          onClick={() => handlePad("down")}
-        >
-          ▼
-        </button>
-        <button
-          type="button"
-          className="ouro-snake__pad ouro-snake__pad--right"
-          aria-label="Right"
-          onClick={() => handlePad("right")}
-        >
-          ▶
-        </button>
       </div>
     </div>
   );
