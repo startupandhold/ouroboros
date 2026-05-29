@@ -7,7 +7,6 @@
     "build": "npm run db:generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npm run db:generate",
     "db:generate": "npx prisma@5.22.0 generate",
     "db:migrate": "npx prisma@5.22.0 migrate dev",
     "db:migrate:deploy": "npx prisma@5.22.0 migrate deploy",
@@ -16,6 +15,7 @@
     "sync:burn-history": "npx --yes tsx scripts/sync-burn-history.ts"
   },
   "dependencies": {
+    "@coin-communities/sdk": "^1.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
     "@metaplex-foundation/umi": "^1.5.1",
     "@metaplex-foundation/umi-bundle-defaults": "^1.5.1",
@@ -27,15 +27,15 @@
     "@solana/wallet-adapter-wallets": "^0.19.38",
     "@solana/web3.js": "^1.98.4",
     "bs58": "^6.0.0",
-    "next": "^14.2.18",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "next": "^16.2.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "use-sound": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.18",
     "prisma": "5.22.0",

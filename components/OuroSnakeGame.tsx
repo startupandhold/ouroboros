@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import {
   useCallback,
   useEffect,
@@ -8,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import useSound from "use-sound";
 
 const GRID = 14;
 const TICK_MS = 160;
@@ -33,6 +36,10 @@ const OUROBOROS_IMG = "/image/ouroboros.jpg";
 const SNAKE_HEAD_IMG = "/image/snake_head.png";
 const SNAKE_BODY_IMG = "/image/snake_body.png";
 const SNAKE_TAIL_IMG = "/image/snake_tail.png";
+const AUDIO_CHILL = "/audio/theme_chill.mp3";
+const AUDIO_CONSUME = "/audio/theme_consume.mp3";
+const AUDIO_CHOMP = "/audio/chomp.wav";
+const AUDIO_PORTAL_SPAWN = "/audio/portal_spawn.ogg";
 
 type Dir = "up" | "down" | "left" | "right";
 type Point = { x: number; y: number };
@@ -82,6 +89,17 @@ type VoidTile = {
 type VoidPhase = "normal" | "warning" | "critical";
 
 type GameStatus = "idle" | "playing" | "over";
+
+type LeaderboardEntry = {
+  walletAddress: string;
+  bestScore: number;
+  achievedAt: string;
+};
+
+function shortWallet(address: string) {
+  if (address.length <= 10) return address;
+  return `${address.slice(0, 4)}…${address.slice(-4)}`;
+}
 
 function same(a: Point, b: Point) {
   return a.x === b.x && a.y === b.y;
@@ -429,6 +447,14 @@ function initialSnake(): Point[] {
 }
 
 export function OuroSnakeGame() {
+  const { publicKey } = useWallet();
+  const [walletUiReady, setWalletUiReady] = useState(false);
+  const [personalBest, setPersonalBest] = useState<number | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [scoreSaved, setScoreSaved] = useState(false);
+  const [scoreSaving, setScoreSaving] = useState(false);
+  const submittedGameOverRef = useRef(false);
+
   const [coins, setCoins] = useState<CoinMeta[]>([]);
   const [coinsLoading, setCoinsLoading] = useState(true);
   const [status, setStatus] = useState<GameStatus>("idle");
@@ -463,6 +489,22 @@ export function OuroSnakeGame() {
   const selfEatStartedRef = useRef(false);
   const coinsRef = useRef<CoinMeta[]>([]);
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const playChompRef = useRef<() => void>(() => {});
+  const playPortalSpawnRef = useRef<() => void>(() => {});
+
+  const [playChomp] = useSound(AUDIO_CHOMP, { volume: 0.65, interrupt: true });
+  const [playPortalSpawn] = useSound(AUDIO_PORTAL_SPAWN, { volume: 0.7 });
+  const [playChill, { stop: stopChill }] = useSound(AUDIO_CHILL, {
+    volume: 0.35,
+    loop: true,
+  });
+  const [playConsume, { stop: stopConsume }] = useSound(AUDIO_CONSUME, {
+    volume: 0.4,
+    loop: true,
+  });
+
+  playChompRef.current = playChomp;
+  playPortalSpawnRef.current = playPortalSpawn;
 
   snakeRef.current = snake;
   tokensRef.current = tokens;
@@ -479,6 +521,109 @@ export function OuroSnakeGame() {
   const currentSpawnMs = useMemo(
     () => spawnIntervalMs(tokensEaten),
     [tokensEaten],
+  );
+
+  useEffect(() => setWalletUiReady(true), []);
+
+  const refreshLeaderboard = useCallback(async (wallet?: string) => {
+    try {
+      const params = new URLSearchParams({ limit: "10" });
+      if (wallet) params.set("wallet", wallet);
+      const res = await fetch(`/api/snake-highscore?${params}`);
+      if (!res.ok) return;
+      const data = (await res.json()) as {
+        leaderboard?: LeaderboardEntry[];
+        bestScore?: number | null;
+      };
+      if (data.leaderboard) setLeaderboard(data.leaderboard);
+      if (wallet && data.bestScore !== undefined) {
+        setPersonalBest(data.bestScore);
+      }
+    } catch {
+      /* ignore fetch errors */
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshLeaderboard();
+  }, [refreshLeaderboard]);
+
+  useEffect(() => {
+    if (!publicKey) {
+      setPersonalBest(null);
+      return;
+    }
+    void refreshLeaderboard(publicKey.toBase58());
+  }, [publicKey, refreshLeaderboard]);
+
+  useEffect(() => {
+    if (status !== "over") {
+      submittedGameOverRef.current = false;
+      setScoreSaved(false);
+      setScoreSaving(false);
+      return;
+    }
+    if (!publicKey || submittedGameOverRef.current) return;
+
+    submittedGameOverRef.current = true;
+    const walletAddress = publicKey.toBase58();
+
+    if (personalBest !== null && score <= personalBest) return;
+
+    setScoreSaving(true);
+    void (async () => {
+      try {
+        const res = await fetch("/api/snake-highscore", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walletAddress, score }),
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          bestScore?: number;
+          isNewBest?: boolean;
+        };
+        if (data.ok && typeof data.bestScore === "number") {
+          setPersonalBest(data.bestScore);
+          if (data.isNewBest) setScoreSaved(true);
+          await refreshLeaderboard(walletAddress);
+        }
+      } catch {
+        /* ignore submit errors */
+      } finally {
+        setScoreSaving(false);
+      }
+    })();
+  }, [status, publicKey, score, personalBest, refreshLeaderboard]);
+
+  useEffect(() => {
+    if (status !== "playing") {
+      stopChill();
+      stopConsume();
+      return;
+    }
+    if (selfEatActive) {
+      stopChill();
+      playConsume();
+    } else {
+      stopConsume();
+      playChill();
+    }
+  }, [
+    status,
+    selfEatActive,
+    playChill,
+    stopChill,
+    playConsume,
+    stopConsume,
+  ]);
+
+  useEffect(
+    () => () => {
+      stopChill();
+      stopConsume();
+    },
+    [stopChill, stopConsume],
   );
 
   useEffect(() => {
@@ -532,6 +677,7 @@ export function OuroSnakeGame() {
     voidTilesRef.current = merged;
     setVoidTiles(merged);
     scheduleNextVoidSpawn(next.spawnedAt);
+    playPortalSpawnRef.current();
     return true;
   }, [scheduleNextVoidSpawn]);
 
@@ -633,6 +779,7 @@ export function OuroSnakeGame() {
 
       if (ateToken?.kind === "coin") {
         nextTokens = nextTokens.filter((t) => t.id !== ateToken.id);
+        playChompRef.current();
         setScore((s) => s + TOKEN_POINTS);
         const eaten = tokensEatenRef.current + 1;
         tokensEatenRef.current = eaten;
@@ -883,6 +1030,7 @@ export function OuroSnakeGame() {
             (t) => t.id !== ateToken!.id,
           );
           if (ateToken.kind === "coin") {
+            playChompRef.current();
             setScore((s) => s + TOKEN_POINTS);
             const eaten = tokensEatenRef.current + 1;
             tokensEatenRef.current = eaten;
@@ -944,6 +1092,7 @@ export function OuroSnakeGame() {
         let nextTokens = tokensRef.current.filter((t) => t.id !== ateToken!.id);
 
         if (ateToken.kind === "coin") {
+          playChompRef.current();
           setScore((s) => s + TOKEN_POINTS);
           const eaten = tokensEatenRef.current + 1;
           tokensEatenRef.current = eaten;
@@ -1006,13 +1155,19 @@ export function OuroSnakeGame() {
   };
 
   const selfEatRate = selfEatPointsPerSegment(Math.max(1, ouroborosEaten));
+  const connectedWallet = publicKey?.toBase58() ?? null;
 
   return (
     <div className="app-shell ouro-snake">
       <header className="top-bar">
         <Link href="/">← back</Link>
         <span>ouroboros snake</span>
-        <span className="ouro-snake__score">{score} pts</span>
+        <div className="ouro-snake__top-end">
+          <span className="ouro-snake__score">{score} pts</span>
+          {walletUiReady && (
+            <WalletMultiButton className="ouro-snake__wallet-btn" />
+          )}
+        </div>
       </header>
 
       <div className="ouro-snake__hero">
@@ -1242,6 +1397,11 @@ export function OuroSnakeGame() {
                     <p className="ouro-snake__overlay-hint">
                       Arrow keys or WASD to move
                     </p>
+                    {!publicKey && (
+                      <p className="ouro-snake__overlay-wallet-hint">
+                        Connect your wallet to track high scores
+                      </p>
+                    )}
                     <button
                       type="button"
                       className="ouro-snake__btn"
@@ -1256,6 +1416,30 @@ export function OuroSnakeGame() {
                   <>
                     <p className="ouro-snake__overlay-title">Game Over</p>
                     <p className="ouro-snake__overlay-score">{score} points</p>
+                    {!publicKey && (
+                      <p className="ouro-snake__overlay-wallet-hint">
+                        Connect wallet to save your score
+                      </p>
+                    )}
+                    {publicKey && scoreSaved && (
+                      <p className="ouro-snake__overlay-highscore">
+                        New high score!
+                      </p>
+                    )}
+                    {publicKey && scoreSaving && (
+                      <p className="ouro-snake__overlay-wallet-hint">
+                        Saving score…
+                      </p>
+                    )}
+                    {publicKey &&
+                      !scoreSaved &&
+                      !scoreSaving &&
+                      personalBest !== null &&
+                      score <= personalBest && (
+                        <p className="ouro-snake__overlay-wallet-hint">
+                          Personal best: {personalBest} pts
+                        </p>
+                      )}
                     <button
                       type="button"
                       className="ouro-snake__btn"
@@ -1303,6 +1487,48 @@ export function OuroSnakeGame() {
               becomes tokens
             </p>
           )}
+          <div className="ouro-snake__highscore">
+            <h3 className="ouro-snake__highscore-title">High scores</h3>
+            {publicKey ? (
+              <p className="ouro-snake__highscore-personal">
+                Your best:{" "}
+                <strong>{personalBest !== null ? personalBest : "—"}</strong>
+              </p>
+            ) : (
+              <p className="ouro-snake__highscore-hint">
+                Connect wallet to track scores
+              </p>
+            )}
+            {leaderboard.length > 0 ? (
+              <ol className="ouro-snake__leaderboard">
+                {leaderboard.map((entry, index) => (
+                  <li
+                    key={entry.walletAddress}
+                    className={[
+                      "ouro-snake__leaderboard-row",
+                      connectedWallet === entry.walletAddress
+                        ? "ouro-snake__leaderboard-row--you"
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    <span className="ouro-snake__leaderboard-rank">
+                      {index + 1}.
+                    </span>
+                    <span className="ouro-snake__leaderboard-wallet">
+                      {shortWallet(entry.walletAddress)}
+                    </span>
+                    <span className="ouro-snake__leaderboard-score">
+                      {entry.bestScore}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="ouro-snake__highscore-hint">No scores yet</p>
+            )}
+          </div>
           <p className="ouro-snake__legend">
             +{TOKEN_POINTS} per token · +{SELF_EAT_BASE} per self-segment
             (+{SELF_EAT_BONUS} per ouroboros eaten) · coins fade after 5s · max{" "}

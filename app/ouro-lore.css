@@ -72,12 +72,15 @@
   border-radius: 16px;
   width: 100%;
   max-width: 720px;
+  min-height: 0;
   height: 100%;
-  padding: 22px 24px 20px;
+  padding: 22px 24px 18px;
   animation: ouro-fade 2.4s 0.75s both;
   position: relative;
   overflow: hidden;
   opacity: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes ouro-fade {
@@ -116,6 +119,122 @@
   text-transform: uppercase;
   color: var(--ouro-fire-2);
   margin-bottom: 14px;
+}
+
+.ouro__loreMark--title {
+  margin-bottom: 0;
+}
+
+.ouro__loreHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.ouro__loreJoin {
+  font-family: var(--font-space), "Space Grotesk", ui-monospace, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-gold-bright);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.ouro__loreJoin:hover {
+  color: var(--ouro-ink);
+}
+
+.ouro__loreScroll {
+  flex: 1;
+  min-height: 0;
+  max-height: min(420px, 52vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ouro-hair-3) transparent;
+}
+
+.ouro__loreScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ouro__loreScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ouro__loreScroll::-webkit-scrollbar-thumb {
+  background: var(--ouro-hair-3);
+  border-radius: 999px;
+}
+
+.ouro__loreScroll::-webkit-scrollbar-thumb:hover {
+  background: var(--ouro-fire-2);
+}
+
+.ouro__lorePost + .ouro__lorePost {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ouro-hair);
+}
+
+.ouro__lorePost .ouro__loreMark {
+  margin-bottom: 10px;
+}
+
+.ouro__lorePost .ouro__loreQuote {
+  margin-bottom: 14px;
+}
+
+.ouro__lorePost .ouro__loreCite {
+  margin-bottom: 0;
+}
+
+.ouro__loreMediaLink {
+  display: block;
+  margin: 0 0 14px;
+  line-height: 0;
+}
+
+.ouro__loreMedia {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--ouro-hair-2);
+}
+
+.ouro__loreAvatar--img {
+  object-fit: cover;
+  background: none;
+}
+
+.ouro__loreHandle--static {
+  cursor: default;
+}
+
+.ouro__loreEmpty {
+  margin: 0;
+  padding: 1rem 0.25rem;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ouro-dim);
+}
+
+.ouro__loreEmpty a {
+  color: var(--accent-gold-bright);
+  text-decoration: none;
+}
+
+.ouro__loreEmpty a:hover {
+  color: var(--ouro-ink);
 }
 
 .ouro__loreQuote {

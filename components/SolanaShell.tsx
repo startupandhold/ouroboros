@@ -1,27 +1,21 @@
 "use client";
 
-import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
-import { DEFAULT_RPC, OUROBOROS_MINT } from "@/lib/constants";
+import { useCallback, useState } from "react";
+import { OUROBOROS_MINT } from "@/lib/constants";
 import { BurnHistoryPanel } from "@/components/BurnHistoryPanel";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
 import { OuroSupplySerpent } from "@/components/OuroSupplySerpent";
 import { OuroborosFeedAnimation } from "@/components/OuroborosFeedAnimation";
 import { PanelFeedInfo } from "@/components/PanelFeedInfo";
+import { SolanaProviders } from "@/components/SolanaProviders";
 
 const PUMP_COIN_URL =
   "https://pump.fun/coin/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
+const COIN_COMMUNITY_URL =
+  "https://coincommunities.org/communities/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
 const X_COMMUNITY_URL =
   "https://x.com/i/communities/2019097621818929284";
 const GITHUB_URL = "https://github.com/startupandhold/ouroboros";
@@ -29,11 +23,6 @@ const OURO_MINT_STR = OUROBOROS_MINT.toBase58();
 
 export function SolanaShell() {
   const [mintCopied, setMintCopied] = useState(false);
-  const endpoint = useMemo(() => DEFAULT_RPC, []);
-  const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
-    [],
-  );
 
   const copyMint = useCallback(async () => {
     try {
@@ -46,10 +35,8 @@ export function SolanaShell() {
   }, []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <div className="app-shell">
+    <SolanaProviders>
+      <div className="app-shell">
             <header className="top-bar">
               <div className="top-bar-start">
                 <span>feed the cycle</span>
@@ -80,6 +67,22 @@ export function SolanaShell() {
                   >
                     <Image
                       src="/image/pumpfun_icon.png"
+                      alt=""
+                      width={20}
+                      height={20}
+                      aria-hidden
+                    />
+                  </a>
+                  <a
+                    href={COIN_COMMUNITY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="top-bar-icon top-bar-icon--coin-community"
+                    aria-label="Ouroboros on Coin Communities"
+                    title="Coin Communities"
+                  >
+                    <Image
+                      src="/image/pump_community.svg"
                       alt=""
                       width={20}
                       height={20}
@@ -230,8 +233,6 @@ export function SolanaShell() {
               <a href={`https://pump.fun/coin/${OURO_MINT_STR}`} target="_blank" rel="noopener noreferrer">{OURO_MINT_STR}</a>.
             </p>
           </div>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    </SolanaProviders>
   );
 }

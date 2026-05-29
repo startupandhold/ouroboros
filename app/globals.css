@@ -136,6 +136,15 @@ button {
   height: 20px;
 }
 
+.top-bar-icon--coin-community img {
+  opacity: 0.92;
+}
+
+.top-bar-icon--coin-community:hover img {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(196, 92, 38, 0.45));
+}
+
 .top-bar-icon--github {
   width: 26px;
   height: 26px;
@@ -1084,7 +1093,8 @@ button {
 .ouro-showcase > .ouro__loreCard {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  min-height: 360px;
 }
 
 .ouro-showcase > .ouro-supply {

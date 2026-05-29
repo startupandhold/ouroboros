@@ -1,4 +1,5 @@
 import { OuroSnakeGame } from "@/components/OuroSnakeGame";
+import { SolanaProviders } from "@/components/SolanaProviders";
 import "../ouro-snake.css";
 
 export const metadata = {
@@ -8,5 +9,9 @@ export const metadata = {
 };
 
 export default function GamePage() {
-  return <OuroSnakeGame />;
+  return (
+    <SolanaProviders>
+      <OuroSnakeGame />
+    </SolanaProviders>
+  );
 }

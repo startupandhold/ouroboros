@@ -17,6 +17,111 @@
   color: var(--accent);
 }
 
+.ouro-snake__top-end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ouro-snake__wallet-btn {
+  font-family: var(--font-space), system-ui, sans-serif !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  height: auto !important;
+  padding: 0.35rem 0.65rem !important;
+  line-height: 1.3 !important;
+  background: rgba(255, 190, 60, 0.12) !important;
+  border: 1px solid rgba(255, 190, 60, 0.45) !important;
+  color: var(--accent) !important;
+  border-radius: 0 !important;
+}
+
+.ouro-snake__wallet-btn:hover {
+  background: rgba(255, 190, 60, 0.22) !important;
+}
+
+.ouro-snake__overlay-wallet-hint {
+  margin: 0.35rem 0 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.ouro-snake__overlay-highscore {
+  margin: 0.35rem 0 0;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffb8ec;
+  text-shadow: 0 0 12px rgba(255, 80, 200, 0.55);
+}
+
+.ouro-snake__highscore {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ouro-snake__highscore-title {
+  margin: 0 0 0.5rem;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.ouro-snake__highscore-personal,
+.ouro-snake__highscore-hint {
+  margin: 0 0 0.65rem;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.ouro-snake__highscore-personal strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.ouro-snake__leaderboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ouro-snake__leaderboard-row {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr auto;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.ouro-snake__leaderboard-row--you {
+  color: var(--accent);
+}
+
+.ouro-snake__leaderboard-rank {
+  color: var(--muted);
+}
+
+.ouro-snake__leaderboard-wallet {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ouro-snake__leaderboard-score {
+  font-weight: 600;
+}
+
 .ouro-snake__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 220px;
