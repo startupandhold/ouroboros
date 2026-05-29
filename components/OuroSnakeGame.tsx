@@ -491,10 +491,12 @@ export function OuroSnakeGame() {
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playChompRef = useRef<() => void>(() => {});
   const playPortalSpawnRef = useRef<() => void>(() => {});
+  const chillStartedRef = useRef(false);
+  const chillPausedRef = useRef(false);
 
   const [playChomp] = useSound(AUDIO_CHOMP, { volume: 0.65, interrupt: true });
   const [playPortalSpawn] = useSound(AUDIO_PORTAL_SPAWN, { volume: 0.7 });
-  const [playChill, { stop: stopChill }] = useSound(AUDIO_CHILL, {
+  const [playChill, { stop: stopChill, pause: pauseChill }] = useSound(AUDIO_CHILL, {
     volume: 0.35,
     loop: true,
   });
@@ -600,19 +602,32 @@ export function OuroSnakeGame() {
     if (status !== "playing") {
       stopChill();
       stopConsume();
+      chillStartedRef.current = false;
+      chillPausedRef.current = false;
       return;
     }
     if (selfEatActive) {
-      stopChill();
+      if (chillStartedRef.current && !chillPausedRef.current) {
+        pauseChill();
+        chillPausedRef.current = true;
+      }
       playConsume();
-    } else {
-      stopConsume();
+      return;
+    }
+
+    stopConsume();
+    if (!chillStartedRef.current) {
       playChill();
+      chillStartedRef.current = true;
+    } else if (chillPausedRef.current) {
+      playChill();
+      chillPausedRef.current = false;
     }
   }, [
     status,
     selfEatActive,
     playChill,
+    pauseChill,
     stopChill,
     playConsume,
     stopConsume,
