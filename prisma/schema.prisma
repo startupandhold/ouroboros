@@ -27,6 +27,7 @@ model OuroBurn {
   sourceUiAmount      Float?
   sourceBurnSignature String?
   swapSignature       String?
+  communityPostedAt   DateTime?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 

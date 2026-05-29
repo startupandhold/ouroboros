@@ -1,7 +1,6 @@
-import { configureApi, api } from "@coin-communities/sdk";
+import { api } from "@coin-communities/sdk";
 import { OUROBOROS_MINT } from "@/lib/constants";
-
-const DEFAULT_API_BASE = "https://api.coin-communities.xyz";
+import { ensureCoinCommunityApi } from "@/lib/coinCommunityApi";
 
 export type CommunityFeedItem = {
   id: string;
@@ -18,22 +17,6 @@ export type CommunityFeedItem = {
   tokenImageUrl: string | null;
   userTwitterUrl: string | null;
 };
-
-let configured = false;
-
-function ensureConfigured(): void {
-  if (configured) return;
-  const key = process.env.OURO_COMM_API_KEY?.trim();
-  if (!key) {
-    throw new Error("OURO_COMM_API_KEY is not configured");
-  }
-  configureApi({
-    baseUrl:
-      process.env.COIN_COMMUNITY_API_URL?.replace(/\/$/, "") ?? DEFAULT_API_BASE,
-    headers: { "x-api-key": key },
-  });
-  configured = true;
-}
 
 export function ouroTokenAddress(): string {
   return (
@@ -85,7 +68,10 @@ export async function fetchCommunityFeedItems(): Promise<{
   communityUrl: string;
   tokenAddress: string;
 }> {
-  ensureConfigured();
+  if (!process.env.OURO_COMM_API_KEY?.trim()) {
+    throw new Error("OURO_COMM_API_KEY is not configured");
+  }
+  ensureCoinCommunityApi();
   const tokenAddress = ouroTokenAddress();
   const communityUrl = ouroCommunityUrl(tokenAddress);
 

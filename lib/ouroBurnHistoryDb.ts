@@ -1,5 +1,7 @@
 import type { BurnPerformedBy, OuroBurn } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { postAgentBurnToCommunity } from "@/lib/coinCommunityPost";
+import { canPostAgentBurnsToCommunity } from "@/lib/coinCommunityApi";
 import {
   OURO_MINT_STR,
   normalizeEntry,
@@ -79,6 +81,15 @@ export async function readBurnHistoryStore(): Promise<OuroBurnHistoryStore> {
 export async function upsertBurnEntries(entries: OuroBurnEntry[]): Promise<void> {
   if (entries.length === 0) return;
 
+  const signatures = entries.map((e) => e.signature);
+  const existingRows = await prisma.ouroBurn.findMany({
+    where: { signature: { in: signatures } },
+    select: { signature: true, communityPostedAt: true },
+  });
+  const existingBySig = new Map(
+    existingRows.map((row) => [row.signature, row.communityPostedAt]),
+  );
+
   await prisma.$transaction(
     entries.map((entry) => {
       const ex = entry.exchange;
@@ -109,6 +120,28 @@ export async function upsertBurnEntries(entries: OuroBurnEntry[]): Promise<void>
       });
     }),
   );
+
+  if (!canPostAgentBurnsToCommunity()) return;
+
+  const toPost = entries.filter((entry) => {
+    if (entry.performedBy !== "agent") return false;
+    return !existingBySig.get(entry.signature);
+  });
+
+  for (const entry of toPost) {
+    try {
+      await postAgentBurnToCommunity(entry);
+      await prisma.ouroBurn.update({
+        where: { signature: entry.signature },
+        data: { communityPostedAt: new Date() },
+      });
+    } catch (e) {
+      console.error(
+        `[community] failed to post agent burn ${entry.signature}:`,
+        e instanceof Error ? e.message : e,
+      );
+    }
+  }
 }
 
 export async function updateSyncState(
