@@ -288,7 +288,7 @@
   pointer-events: none;
   background:
     radial-gradient(circle at 50% 0%, rgba(196, 92, 38, 0.1), transparent 55%),
-    rgba(10, 10, 10, 0.62);
+    rgba(10, 10, 10, 0.74);
 }
 
 .ouro-snake__board--self-devour {
