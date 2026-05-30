@@ -32,6 +32,15 @@ const VOID_LIFETIME_MS = 15_000;
 const VOID_WARMUP_MS = 2_000;
 const VOID_WARN_MS = 3_000;
 const VOID_CRITICAL_MS = 1_000;
+const SCALE_VOID_WARMUP_MS = 2_000;
+const SCALE_VOID_NORMAL_MS = 4_000;
+const SCALE_VOID_WARN_MS = 2_000;
+const SCALE_VOID_CRITICAL_MS = 2_000;
+const SCALE_VOID_TOTAL_MS =
+  SCALE_VOID_WARMUP_MS +
+  SCALE_VOID_NORMAL_MS +
+  SCALE_VOID_WARN_MS +
+  SCALE_VOID_CRITICAL_MS;
 const VOID_TICK_MS = 100;
 const DEATH_ANIM_MS = 880;
 const OUROBOROS_IMG = "/image/ouroboros.jpg";
@@ -81,11 +90,14 @@ type DeadScale = {
   rotation: number;
 };
 
+type VoidKind = "ambient" | "scale";
+
 type VoidTile = {
   id: string;
   x: number;
   y: number;
   spawnedAt: number;
+  kind: VoidKind;
 };
 
 type VoidPhase = "warmup" | "normal" | "warning" | "critical";
@@ -124,12 +136,31 @@ function voidSpawnIntervalMs(voidSpawnCount: number) {
   );
 }
 
+function voidLifetimeMs(voidTile: VoidTile) {
+  return voidTile.kind === "scale" ? SCALE_VOID_TOTAL_MS : VOID_LIFETIME_MS;
+}
+
+function voidWarmupMs(voidTile: VoidTile) {
+  return voidTile.kind === "scale" ? SCALE_VOID_WARMUP_MS : VOID_WARMUP_MS;
+}
+
 function voidRemainingMs(voidTile: VoidTile, now = Date.now()) {
-  return Math.max(0, VOID_LIFETIME_MS - (now - voidTile.spawnedAt));
+  return Math.max(0, voidLifetimeMs(voidTile) - (now - voidTile.spawnedAt));
 }
 
 function voidPhase(voidTile: VoidTile, now = Date.now()): VoidPhase {
-  if (now - voidTile.spawnedAt < VOID_WARMUP_MS) return "warmup";
+  const age = now - voidTile.spawnedAt;
+  if (age < voidWarmupMs(voidTile)) return "warmup";
+
+  if (voidTile.kind === "scale") {
+    const activeAge = age - SCALE_VOID_WARMUP_MS;
+    if (activeAge >= SCALE_VOID_NORMAL_MS + SCALE_VOID_WARN_MS) {
+      return "critical";
+    }
+    if (activeAge >= SCALE_VOID_NORMAL_MS) return "warning";
+    return "normal";
+  }
+
   const remaining = voidRemainingMs(voidTile, now);
   if (remaining <= VOID_CRITICAL_MS) return "critical";
   if (remaining <= VOID_WARN_MS) return "warning";
@@ -139,7 +170,7 @@ function voidPhase(voidTile: VoidTile, now = Date.now()): VoidPhase {
 function voidIsDeadly(voidTile: VoidTile, now = Date.now()) {
   return (
     voidRemainingMs(voidTile, now) > 0 &&
-    now - voidTile.spawnedAt >= VOID_WARMUP_MS
+    now - voidTile.spawnedAt >= voidWarmupMs(voidTile)
   );
 }
 
@@ -245,6 +276,7 @@ function spawnVoid(
     x: spot.x,
     y: spot.y,
     spawnedAt: Date.now(),
+    kind: "ambient",
   };
 }
 
@@ -410,26 +442,15 @@ function appendTrail(
   return [...without, trail];
 }
 
-function deadScalesToTokens(
-  scales: DeadScale[],
-  coins: CoinMeta[],
-): Token[] {
+function deadScalesToScaleVoids(scales: DeadScale[]): VoidTile[] {
   const now = Date.now();
-  return scales.map((d) => {
-    const coin =
-      coins.length > 0
-        ? coins[Math.floor(Math.random() * coins.length)]
-        : null;
-    return {
-      id: `from-dead-${d.id}`,
-      x: d.x,
-      y: d.y,
-      kind: "coin",
-      image: coin?.image_uri ?? OUROBOROS_IMG,
-      spawnedAt: now,
-      transforming: true,
-    };
-  });
+  return scales.map((d) => ({
+    id: `scale-void-${d.id}`,
+    x: d.x,
+    y: d.y,
+    spawnedAt: now,
+    kind: "scale" as const,
+  }));
 }
 
 function maintainTokens(tokens: Token[], now: number): Token[] {
@@ -836,7 +857,7 @@ export function OuroSnakeGame() {
 
   const finishSelfDevour = useCallback(
     (scales: DeadScale[], nextHead: Point, ateToken: Token | null) => {
-      const spawned = deadScalesToTokens(scales, coinsRef.current);
+      const spawnedVoids = deadScalesToScaleVoids(scales);
 
       selfEatActiveRef.current = false;
       selfEatStartedRef.current = false;
@@ -847,10 +868,14 @@ export function OuroSnakeGame() {
       setStaticBody([]);
       setDeadScales([]);
 
-      let nextTokens = tokensRef.current.filter(
-        (t) => !spawned.some((s) => s.x === t.x && s.y === t.y),
-      );
-      nextTokens = [...nextTokens, ...spawned];
+      if (spawnedVoids.length > 0) {
+        const mergedVoids = [...voidTilesRef.current, ...spawnedVoids];
+        voidTilesRef.current = mergedVoids;
+        setVoidTiles(mergedVoids);
+        playPortalSpawnRef.current();
+      }
+
+      let nextTokens = tokensRef.current;
 
       if (ateToken?.kind === "coin") {
         nextTokens = nextTokens.filter((t) => t.id !== ateToken.id);
@@ -1356,6 +1381,7 @@ export function OuroSnakeGame() {
                       className={[
                         "ouro-snake__void",
                         `ouro-snake__void--${voidVisualPhase}`,
+                        voidTile.kind === "scale" ? "ouro-snake__void--scale" : "",
                         isDying && deathCause === "void"
                           ? "ouro-snake__void--death-consume"
                           : "",
