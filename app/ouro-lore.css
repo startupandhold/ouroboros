@@ -123,6 +123,16 @@
 
 .ouro__loreMark--title {
   margin-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ouro__loreMarkIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: block;
 }
 
 .ouro__loreHead {

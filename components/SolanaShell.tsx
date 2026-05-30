@@ -225,7 +225,7 @@ export function SolanaShell() {
             </div>
 
             <p className="disclaimer">
-              Experimental interface. Each burn-position row chains Sol Incinerator
+              Each burn-position row chains Sol Incinerator
               → Jupiter SOL→OUROBOROS (when reclaim clears the minimum swap size)
               → on-chain SPL burn of OURO when applicable. The empty-shells button uses the same
               Jupiter + burn pattern. USD slider uses DexScreener and can be wrong

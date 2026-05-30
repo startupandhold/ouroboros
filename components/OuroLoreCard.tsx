@@ -147,7 +147,14 @@ export function OuroLoreCard() {
     <div className="ouro__loreCard">
       <div className="ouro__loreHead">
         <span className="ouro__loreMark ouro__loreMark--title">
-          ∞ coin communities
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/image/pump_community.svg"
+            alt=""
+            className="ouro__loreMarkIcon"
+            aria-hidden="true"
+          />
+          coin communities
         </span>
         <a
           href={communityUrl}
