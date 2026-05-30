@@ -51,6 +51,8 @@ const AUDIO_CHILL = "/audio/theme_chill.mp3";
 const AUDIO_CONSUME = "/audio/theme_consume.mp3";
 const AUDIO_CHOMP = "/audio/chomp.wav";
 const AUDIO_PORTAL_SPAWN = "/audio/portal_spawn.ogg";
+const BOARD_AMBIENCE_VIDEO = "/video/spectral_sand_blue.mp4";
+const BOARD_AMBIENCE_VOLUME = 0.1;
 
 type Dir = "up" | "down" | "left" | "right";
 type Point = { x: number; y: number };
@@ -535,6 +537,7 @@ export function OuroSnakeGame() {
   const playPortalSpawnRef = useRef<() => void>(() => {});
   const chillStartedRef = useRef(false);
   const chillPausedRef = useRef(false);
+  const boardAmbienceRef = useRef<HTMLVideoElement>(null);
   const deathAnimRef = useRef<DeathAnim | null>(null);
 
   const [playChomp] = useSound(AUDIO_CHOMP, { volume: 0.65, interrupt: true });
@@ -652,6 +655,28 @@ export function OuroSnakeGame() {
       }
     })();
   }, [status, publicKey, score, personalBest, refreshLeaderboard]);
+
+  useEffect(() => {
+    const video = boardAmbienceRef.current;
+    if (!video) return;
+    video.loop = true;
+    video.volume = BOARD_AMBIENCE_VOLUME;
+    video.muted = true;
+    void video.play().catch(() => {
+      /* autoplay blocked until user gesture */
+    });
+  }, []);
+
+  useEffect(() => {
+    const video = boardAmbienceRef.current;
+    if (!video) return;
+    if (status !== "playing" && status !== "dying") return;
+    video.volume = BOARD_AMBIENCE_VOLUME;
+    video.muted = false;
+    void video.play().catch(() => {
+      /* ignore play errors */
+    });
+  }, [status]);
 
   useEffect(() => {
     if (status !== "playing") {
@@ -1309,6 +1334,18 @@ export function OuroSnakeGame() {
             role="grid"
             aria-label="Snake game board"
           >
+            <video
+              ref={boardAmbienceRef}
+              className="ouro-snake__board-bg-video"
+              src={BOARD_AMBIENCE_VIDEO}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              aria-hidden
+            />
+            <div className="ouro-snake__board-bg-scrim" aria-hidden />
             {selfEatActive && !isDying && (
               <div className="ouro-snake__ripple" aria-hidden />
             )}
