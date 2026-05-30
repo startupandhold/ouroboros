@@ -41,7 +41,7 @@ function LorePost(props: {
 
   return (
     <article className="ouro__lorePost">
-      <span className="ouro__loreMark">∞ ouro · {formatMark(item.createdAt)}</span>
+      <span className="ouro__loreMark">∞ · {formatMark(item.createdAt)}</span>
       <blockquote className="ouro__loreQuote">&ldquo;{item.content}&rdquo;</blockquote>
 
       {item.mediaUrl ? (

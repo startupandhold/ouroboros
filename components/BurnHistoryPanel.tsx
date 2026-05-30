@@ -147,7 +147,7 @@ export function BurnHistoryPanel() {
             <li key={e.signature} className="burn-history__row">
               <div className="burn-history__row-main">
                 <span className="burn-history__amount">
-                  {formatAmount(e.amountUi)} OURO
+                  {formatAmount(e.amountUi)} OUROBOROS
                 </span>
                 <span
                   className={`burn-history__tag burn-history__tag--${e.performedBy}`}
