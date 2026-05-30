@@ -33,6 +33,7 @@ const VOID_WARMUP_MS = 2_000;
 const VOID_WARN_MS = 3_000;
 const VOID_CRITICAL_MS = 1_000;
 const VOID_TICK_MS = 100;
+const DEATH_ANIM_MS = 880;
 const OUROBOROS_IMG = "/image/ouroboros.jpg";
 const SNAKE_HEAD_IMG = "/image/snake_head.png";
 const SNAKE_BODY_IMG = "/image/snake_body.png";
@@ -89,7 +90,17 @@ type VoidTile = {
 
 type VoidPhase = "warmup" | "normal" | "warning" | "critical";
 
-type GameStatus = "idle" | "playing" | "over";
+type GameStatus = "idle" | "playing" | "dying" | "over";
+
+type DeathCause = "void" | "wall" | "self";
+
+type DeathAnim = {
+  cause: DeathCause;
+  snake: Point[];
+  direction: Dir;
+  impact: Point;
+  hitIndex?: number;
+};
 
 type LeaderboardEntry = {
   walletAddress: string;
@@ -480,6 +491,7 @@ export function OuroSnakeGame() {
   const [voidTiles, setVoidTiles] = useState<VoidTile[]>([]);
   const [voidClock, setVoidClock] = useState(0);
   const [spawnTimerActive, setSpawnTimerActive] = useState(false);
+  const [deathAnim, setDeathAnim] = useState<DeathAnim | null>(null);
 
   const directionRef = useRef<Dir>("right");
   const pendingDirRef = useRef<Dir | null>(null);
@@ -502,6 +514,7 @@ export function OuroSnakeGame() {
   const playPortalSpawnRef = useRef<() => void>(() => {});
   const chillStartedRef = useRef(false);
   const chillPausedRef = useRef(false);
+  const deathAnimRef = useRef<DeathAnim | null>(null);
 
   const [playChomp] = useSound(AUDIO_CHOMP, { volume: 0.65, interrupt: true });
   const [playPortalSpawn] = useSound(AUDIO_PORTAL_SPAWN, { volume: 0.7 });
@@ -528,6 +541,18 @@ export function OuroSnakeGame() {
   selfEatActiveRef.current = selfEatActive;
   selfEatStartedRef.current = selfEatStarted;
   coinsRef.current = coins;
+  deathAnimRef.current = deathAnim;
+
+  const displaySnake = useMemo(() => {
+    if (!deathAnim) return snake;
+    if (deathAnim.cause === "void" || deathAnim.cause === "self") {
+      return [deathAnim.impact, ...deathAnim.snake.slice(1)];
+    }
+    return deathAnim.snake;
+  }, [deathAnim, snake]);
+
+  const displayDirection = deathAnim?.direction ?? direction;
+  const isDying = status === "dying";
 
   const currentSpawnMs = useMemo(
     () => spawnIntervalMs(tokensEaten),
@@ -761,6 +786,8 @@ export function OuroSnakeGame() {
     setVoidTiles([]);
     setVoidClock(0);
     setSpawnTimerActive(false);
+    deathAnimRef.current = null;
+    setDeathAnim(null);
     const first =
       spawnToken(startSnake, [], coinsRef.current, "coin", [], [], []) ??
       ({
@@ -777,11 +804,35 @@ export function OuroSnakeGame() {
   }, [clearSpawnTimer, clearVoidTimer]);
 
   const gameOver = useCallback(() => {
-    clearSpawnTimer();
-    clearVoidTimer();
-    setSpawnTimerActive(false);
+    deathAnimRef.current = null;
+    setDeathAnim(null);
     setStatus("over");
-  }, [clearSpawnTimer, clearVoidTimer]);
+  }, []);
+
+  const triggerDeath = useCallback(
+    (cause: DeathCause, impact: Point, hitIndex?: number) => {
+      clearSpawnTimer();
+      clearVoidTimer();
+      setSpawnTimerActive(false);
+      const nextDeath: DeathAnim = {
+        cause,
+        snake: [...snakeRef.current],
+        direction: directionRef.current,
+        impact,
+        hitIndex,
+      };
+      deathAnimRef.current = nextDeath;
+      setDeathAnim(nextDeath);
+      setStatus("dying");
+    },
+    [clearSpawnTimer, clearVoidTimer],
+  );
+
+  useEffect(() => {
+    if (status !== "dying") return;
+    const id = window.setTimeout(() => gameOver(), DEATH_ANIM_MS);
+    return () => window.clearTimeout(id);
+  }, [status, gameOver]);
 
   const finishSelfDevour = useCallback(
     (scales: DeadScale[], nextHead: Point, ateToken: Token | null) => {
@@ -864,7 +915,7 @@ export function OuroSnakeGame() {
         resetGame();
         return;
       }
-      if (statusRef.current === "over") return;
+      if (statusRef.current === "over" || statusRef.current === "dying") return;
       applyDirection(dir);
     };
     window.addEventListener("keydown", onKey);
@@ -948,13 +999,13 @@ export function OuroSnakeGame() {
         nextHead.y < 0 ||
         nextHead.y >= GRID
       ) {
-        gameOver();
+        triggerDeath("wall", head);
         return;
       }
 
       const hitVoid = voidTilesRef.current.find((v) => same(v, nextHead));
       if (hitVoid && voidIsDeadly(hitVoid)) {
-        gameOver();
+        triggerDeath("void", nextHead);
         return;
       }
 
@@ -1002,7 +1053,7 @@ export function OuroSnakeGame() {
 
         const deadHit = scales.find((d) => same(d, nextHead));
         if (deadHit) {
-          gameOver();
+          triggerDeath("self", nextHead);
           return;
         }
 
@@ -1028,7 +1079,7 @@ export function OuroSnakeGame() {
             }
             return;
           }
-          gameOver();
+          triggerDeath("self", nextHead);
           return;
         }
 
@@ -1095,9 +1146,9 @@ export function OuroSnakeGame() {
         }
         return;
       } else {
-        const hitBody = body.slice(1).some((s) => same(s, nextHead));
-        if (hitBody) {
-          gameOver();
+        const hitBodyIndex = body.findIndex((s, i) => i > 0 && same(s, nextHead));
+        if (hitBodyIndex > 0) {
+          triggerDeath("self", nextHead, hitBodyIndex);
           return;
         }
       }
@@ -1163,7 +1214,7 @@ export function OuroSnakeGame() {
   }, [
     status,
     finishSelfDevour,
-    gameOver,
+    triggerDeath,
     spawnTimerActive,
     startSpawnTimer,
   ]);
@@ -1174,7 +1225,7 @@ export function OuroSnakeGame() {
       applyDirection(dir);
       return;
     }
-    if (status === "over") return;
+    if (status === "over" || status === "dying") return;
     applyDirection(dir);
   };
 
@@ -1206,22 +1257,41 @@ export function OuroSnakeGame() {
           <div
             className={[
               "ouro-snake__board",
-              selfEatActive ? "ouro-snake__board--self-devour" : "",
+              selfEatActive && !isDying ? "ouro-snake__board--self-devour" : "",
+              deathAnim?.cause === "void"
+                ? "ouro-snake__board--death-void"
+                : "",
+              deathAnim?.cause === "wall"
+                ? "ouro-snake__board--death-wall"
+                : "",
+              deathAnim?.cause === "self"
+                ? "ouro-snake__board--death-self"
+                : "",
             ]
               .filter(Boolean)
               .join(" ")}
-            style={{ "--grid": GRID } as React.CSSProperties}
+            style={
+              {
+                "--grid": GRID,
+                ...(deathAnim?.cause === "wall"
+                  ? {
+                      "--death-dir-x": dirDelta(displayDirection).x,
+                      "--death-dir-y": dirDelta(displayDirection).y,
+                    }
+                  : {}),
+              } as React.CSSProperties
+            }
             role="grid"
             aria-label="Snake game board"
           >
-            {selfEatActive && (
+            {selfEatActive && !isDying && (
               <div className="ouro-snake__ripple" aria-hidden />
             )}
             {Array.from({ length: GRID * GRID }).map((_, i) => {
               const x = i % GRID;
               const y = Math.floor(i / GRID);
               const center = Math.floor(GRID / 2);
-              const segIndex = snake.findIndex((s) => s.x === x && s.y === y);
+              const segIndex = displaySnake.findIndex((s) => s.x === x && s.y === y);
               const isHead = segIndex === 0;
               const token = tokens.find((t) => t.x === x && t.y === y);
               const voidTile = voidTiles.find((v) => v.x === x && v.y === y);
@@ -1233,7 +1303,20 @@ export function OuroSnakeGame() {
                 : 0;
               const segment =
                 segIndex >= 0
-                  ? snakeSegmentSprite(snake, segIndex, direction)
+                  ? snakeSegmentSprite(displaySnake, segIndex, displayDirection)
+                  : null;
+              const deathCause = deathAnim?.cause;
+              const deathDelay =
+                deathAnim && segIndex >= 0
+                  ? deathAnim.hitIndex != null
+                    ? Math.abs(segIndex - deathAnim.hitIndex) * 0.055
+                    : segIndex * 0.06
+                  : 0;
+              const wallHeadAxis =
+                deathCause === "wall" && isHead
+                  ? dirDelta(displayDirection).x !== 0
+                    ? "x"
+                    : "y"
                   : null;
 
               return (
@@ -1242,23 +1325,30 @@ export function OuroSnakeGame() {
                   className={[
                     "ouro-snake__cell",
                     segIndex >= 0 ? "ouro-snake__cell--snake" : "",
-                    selfEatActive && isHead
+                    selfEatActive && isHead && !isDying
                       ? "ouro-snake__cell--head-devour"
                       : "",
                     isHead ? "ouro-snake__cell--head" : "",
                     voidVisualPhase
                       ? `ouro-snake__cell--void ouro-snake__cell--void-${voidVisualPhase}`
                       : "",
-                    selfEatActive ? "ouro-snake__cell--ripple" : "",
+                    selfEatActive && !isDying ? "ouro-snake__cell--ripple" : "",
+                    isDying && deathCause === "void" && voidTile
+                      ? "ouro-snake__cell--death-void-impact"
+                      : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                   style={
-                    selfEatActive
+                    selfEatActive && !isDying
                       ? ({
                           "--ripple-delay": `${rippleDelay}s`,
                         } as React.CSSProperties)
-                      : undefined
+                      : isDying && deathCause
+                        ? ({
+                            "--death-delay": `${deathDelay}s`,
+                          } as React.CSSProperties)
+                        : undefined
                   }
                 >
                   {voidTile && (
@@ -1266,7 +1356,12 @@ export function OuroSnakeGame() {
                       className={[
                         "ouro-snake__void",
                         `ouro-snake__void--${voidVisualPhase}`,
-                      ].join(" ")}
+                        isDying && deathCause === "void"
+                          ? "ouro-snake__void--death-consume"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       aria-hidden
                     />
                   )}
@@ -1274,8 +1369,20 @@ export function OuroSnakeGame() {
                     <div
                       className={[
                         "ouro-snake__segment",
-                        selfEatActive && isHead
+                        selfEatActive && isHead && !isDying
                           ? "ouro-snake__segment--devour"
+                          : "",
+                        deathCause
+                          ? `ouro-snake__segment--death-${deathCause}`
+                          : "",
+                        deathCause === "wall" && isHead && wallHeadAxis
+                          ? `ouro-snake__segment--death-wall-head-${wallHeadAxis}`
+                          : "",
+                        deathCause === "void" && isHead
+                          ? "ouro-snake__segment--death-void-head"
+                          : "",
+                        deathCause === "self" && isHead
+                          ? "ouro-snake__segment--death-self-head"
                           : "",
                       ]
                         .filter(Boolean)
@@ -1405,7 +1512,7 @@ export function OuroSnakeGame() {
                 ))}
               </div>
             )}
-            {status !== "playing" && (
+            {status !== "playing" && status !== "dying" && (
               <div
                 className={[
                   "ouro-snake__overlay",

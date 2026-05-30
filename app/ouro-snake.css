@@ -909,6 +909,249 @@
   user-select: none;
 }
 
+/* Death animations */
+.ouro-snake__board--death-wall {
+  animation: ouro-snake-death-wall-shake 0.88s ease-out forwards;
+}
+
+.ouro-snake__board--death-void {
+  animation: ouro-snake-death-void-board 0.88s ease-in forwards;
+}
+
+.ouro-snake__board--death-self {
+  animation: ouro-snake-death-self-board 0.88s ease-out forwards;
+}
+
+.ouro-snake__cell--death-void-impact {
+  z-index: 2;
+}
+
+.ouro-snake__void--death-consume {
+  animation:
+    ouro-snake-void-pulse 0.35s ease-in-out 2,
+    ouro-snake-death-void-swell 0.88s ease-in forwards !important;
+  z-index: 3;
+}
+
+.ouro-snake__segment--death-wall .ouro-snake__segment-img {
+  animation: ouro-snake-death-wall-body 0.88s ease-out forwards;
+  animation-delay: var(--death-delay, 0s);
+}
+
+.ouro-snake__segment--death-wall-head-x .ouro-snake__segment-img {
+  animation: ouro-snake-death-wall-squish-x 0.88s ease-out forwards;
+}
+
+.ouro-snake__segment--death-wall-head-y .ouro-snake__segment-img {
+  animation: ouro-snake-death-wall-squish-y 0.88s ease-out forwards;
+}
+
+.ouro-snake__segment--death-void .ouro-snake__segment-img {
+  animation: ouro-snake-death-void-body 0.88s ease-in forwards;
+  animation-delay: var(--death-delay, 0s);
+}
+
+.ouro-snake__segment--death-void-head .ouro-snake__segment-img {
+  animation: ouro-snake-death-void-head 0.88s ease-in forwards;
+  z-index: 5;
+}
+
+.ouro-snake__segment--death-self .ouro-snake__segment-img {
+  animation: ouro-snake-death-self-segment 0.88s ease-out forwards;
+  animation-delay: var(--death-delay, 0s);
+}
+
+.ouro-snake__segment--death-self-head .ouro-snake__segment-img {
+  animation: ouro-snake-death-self-head 0.88s ease-out forwards;
+}
+
+@keyframes ouro-snake-death-wall-shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  12% {
+    transform: translate(
+      calc(var(--death-dir-x, 1) * -5px),
+      calc(var(--death-dir-y, 0) * -5px)
+    );
+  }
+  24% {
+    transform: translate(
+      calc(var(--death-dir-x, 1) * 4px),
+      calc(var(--death-dir-y, 0) * 4px)
+    );
+  }
+  36% {
+    transform: translate(
+      calc(var(--death-dir-x, 1) * -3px),
+      calc(var(--death-dir-y, 0) * -3px)
+    );
+  }
+  48% {
+    transform: translate(
+      calc(var(--death-dir-x, 1) * 2px),
+      calc(var(--death-dir-y, 0) * 2px)
+    );
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes ouro-snake-death-wall-squish-x {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  18% {
+    transform: scale(1.45, 0.42) translateX(calc(var(--death-dir-x, 1) * 18%));
+    filter: brightness(1.35) saturate(1.2);
+  }
+  45% {
+    transform: scale(1.15, 0.55) translateX(calc(var(--death-dir-x, 1) * 10%));
+    filter: brightness(0.85) saturate(0.7);
+  }
+  100% {
+    transform: scale(0.2, 0.15) translateX(calc(var(--death-dir-x, 1) * 28%));
+    opacity: 0;
+    filter: brightness(0.35) grayscale(0.6);
+  }
+}
+
+@keyframes ouro-snake-death-wall-squish-y {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  18% {
+    transform: scale(0.42, 1.45) translateY(calc(var(--death-dir-y, 1) * 18%));
+    filter: brightness(1.35) saturate(1.2);
+  }
+  45% {
+    transform: scale(0.55, 1.15) translateY(calc(var(--death-dir-y, 1) * 10%));
+    filter: brightness(0.85) saturate(0.7);
+  }
+  100% {
+    transform: scale(0.15, 0.2) translateY(calc(var(--death-dir-y, 1) * 28%));
+    opacity: 0;
+    filter: brightness(0.35) grayscale(0.6);
+  }
+}
+
+@keyframes ouro-snake-death-wall-body {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  35% {
+    opacity: 0.85;
+    transform: scale(0.96);
+    filter: brightness(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.65);
+    filter: brightness(0.4) grayscale(0.5);
+  }
+}
+
+@keyframes ouro-snake-death-void-board {
+  0% {
+    box-shadow: 0 0 0 rgba(140, 60, 255, 0);
+  }
+  30% {
+    box-shadow: 0 0 28px rgba(140, 60, 255, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(80, 30, 140, 0.2);
+  }
+}
+
+@keyframes ouro-snake-death-void-swell {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.12);
+    filter: brightness(1.35) saturate(1.4);
+  }
+}
+
+@keyframes ouro-snake-death-void-head {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    filter: brightness(1);
+  }
+  35% {
+    transform: scale(0.72) rotate(120deg);
+    opacity: 0.95;
+    filter: brightness(1.4) hue-rotate(35deg) saturate(1.5);
+  }
+  100% {
+    transform: scale(0) rotate(540deg);
+    opacity: 0;
+    filter: brightness(0.6) hue-rotate(70deg);
+  }
+}
+
+@keyframes ouro-snake-death-void-body {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.25);
+    filter: brightness(1.6) hue-rotate(45deg) saturate(1.3);
+  }
+}
+
+@keyframes ouro-snake-death-self-board {
+  0% {
+    box-shadow: 0 0 0 rgba(255, 60, 60, 0);
+  }
+  15% {
+    box-shadow: 0 0 24px rgba(255, 60, 60, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(255, 60, 60, 0);
+  }
+}
+
+@keyframes ouro-snake-death-self-head {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(1.28);
+    filter: brightness(2.2) saturate(2) hue-rotate(-25deg);
+  }
+  100% {
+    transform: scale(0) rotate(120deg);
+    opacity: 0;
+    filter: brightness(0.35) saturate(0.4);
+  }
+}
+
+@keyframes ouro-snake-death-self-segment {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  22% {
+    transform: scale(1.15);
+    filter: brightness(1.8) saturate(1.6) hue-rotate(-20deg);
+  }
+  100% {
+    transform: scale(0) rotate(90deg);
+    opacity: 0;
+    filter: brightness(0.4) grayscale(0.35);
+  }
+}
+
 .ouro-snake__overlay {
   position: absolute;
   inset: 0;
@@ -1093,7 +1336,18 @@
   .ouro-snake__void--warning,
   .ouro-snake__void--critical,
   .ouro-snake__void::before,
-  .ouro-snake__void::after {
+  .ouro-snake__void::after,
+  .ouro-snake__board--death-wall,
+  .ouro-snake__board--death-void,
+  .ouro-snake__board--death-self,
+  .ouro-snake__void--death-consume,
+  .ouro-snake__segment--death-wall .ouro-snake__segment-img,
+  .ouro-snake__segment--death-wall-head-x .ouro-snake__segment-img,
+  .ouro-snake__segment--death-wall-head-y .ouro-snake__segment-img,
+  .ouro-snake__segment--death-void .ouro-snake__segment-img,
+  .ouro-snake__segment--death-void-head .ouro-snake__segment-img,
+  .ouro-snake__segment--death-self .ouro-snake__segment-img,
+  .ouro-snake__segment--death-self-head .ouro-snake__segment-img {
     animation: none;
   }
 
