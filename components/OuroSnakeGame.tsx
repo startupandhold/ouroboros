@@ -53,6 +53,123 @@ const AUDIO_CHOMP = "/audio/chomp.wav";
 const AUDIO_PORTAL_SPAWN = "/audio/portal_spawn.ogg";
 const BOARD_AMBIENCE_VIDEO = "/video/spectral_sand_blue.mp4";
 const BOARD_AMBIENCE_VOLUME = 0.1;
+const BOARD_AMBIENCE_CROSSFADE_S = 1.5;
+
+function smoothstep(t: number): number {
+  return t * t * (3 - 2 * t);
+}
+
+function BoardAmbienceVideo(props: { audioEnabled: boolean }) {
+  const { audioEnabled } = props;
+  const videoARef = useRef<HTMLVideoElement>(null);
+  const videoBRef = useRef<HTMLVideoElement>(null);
+  const [front, setFront] = useState<"a" | "b">("a");
+  const crossfadingRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const frontVideo = (front === "a" ? videoARef : videoBRef).current;
+    const backVideo = (front === "a" ? videoBRef : videoARef).current;
+    if (!frontVideo || !backVideo) return;
+
+    frontVideo.loop = false;
+    backVideo.loop = false;
+    frontVideo.style.opacity = "1";
+    backVideo.style.opacity = "0";
+    frontVideo.volume = audioEnabled ? BOARD_AMBIENCE_VOLUME : 0;
+    frontVideo.muted = !audioEnabled;
+    backVideo.volume = 0;
+    backVideo.muted = true;
+
+    if (frontVideo.paused) {
+      void frontVideo.play().catch(() => {
+        /* autoplay blocked until user gesture */
+      });
+    }
+
+    const onTimeUpdate = () => {
+      if (crossfadingRef.current) return;
+      const duration = frontVideo.duration;
+      if (!Number.isFinite(duration) || duration <= 0) return;
+      if (duration - frontVideo.currentTime > BOARD_AMBIENCE_CROSSFADE_S) return;
+
+      crossfadingRef.current = true;
+      backVideo.currentTime = 0;
+      void backVideo.play().catch(() => {});
+
+      const fadeStart = performance.now();
+      const fadeMs = BOARD_AMBIENCE_CROSSFADE_S * 1000;
+
+      const tick = (now: number) => {
+        const linear = Math.min(1, (now - fadeStart) / fadeMs);
+        const mix = smoothstep(linear);
+        frontVideo.style.opacity = String(1 - mix);
+        backVideo.style.opacity = String(mix);
+        if (audioEnabled) {
+          frontVideo.volume = BOARD_AMBIENCE_VOLUME * (1 - mix);
+          backVideo.volume = BOARD_AMBIENCE_VOLUME * mix;
+          backVideo.muted = false;
+        }
+        if (linear < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
+        frontVideo.pause();
+        frontVideo.currentTime = 0;
+        frontVideo.style.opacity = "0";
+        frontVideo.volume = 0;
+        frontVideo.muted = true;
+        backVideo.style.opacity = "1";
+        if (audioEnabled) {
+          backVideo.volume = BOARD_AMBIENCE_VOLUME;
+          backVideo.muted = false;
+        }
+        crossfadingRef.current = false;
+        setFront((current) => (current === "a" ? "b" : "a"));
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    frontVideo.addEventListener("timeupdate", onTimeUpdate);
+    return () => {
+      frontVideo.removeEventListener("timeupdate", onTimeUpdate);
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [front, audioEnabled]);
+
+  useEffect(() => {
+    const frontVideo = (front === "a" ? videoARef : videoBRef).current;
+    if (!frontVideo || crossfadingRef.current) return;
+    frontVideo.volume = audioEnabled ? BOARD_AMBIENCE_VOLUME : 0;
+    frontVideo.muted = !audioEnabled;
+  }, [front, audioEnabled]);
+
+  useEffect(
+    () => () => {
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    },
+    [],
+  );
+
+  const videoProps = {
+    className: "ouro-snake__board-bg-video",
+    src: BOARD_AMBIENCE_VIDEO,
+    playsInline: true,
+    preload: "auto" as const,
+  };
+
+  return (
+    <div className="ouro-snake__board-bg-video-wrap" aria-hidden>
+      <video ref={videoARef} {...videoProps} />
+      <video ref={videoBRef} {...videoProps} />
+    </div>
+  );
+}
 
 type Dir = "up" | "down" | "left" | "right";
 type Point = { x: number; y: number };
@@ -537,7 +654,6 @@ export function OuroSnakeGame() {
   const playPortalSpawnRef = useRef<() => void>(() => {});
   const chillStartedRef = useRef(false);
   const chillPausedRef = useRef(false);
-  const boardAmbienceRef = useRef<HTMLVideoElement>(null);
   const deathAnimRef = useRef<DeathAnim | null>(null);
 
   const [playChomp] = useSound(AUDIO_CHOMP, { volume: 0.65, interrupt: true });
@@ -577,6 +693,7 @@ export function OuroSnakeGame() {
 
   const displayDirection = deathAnim?.direction ?? direction;
   const isDying = status === "dying";
+  const boardAmbienceAudio = status === "playing" || status === "dying";
 
   const currentSpawnMs = useMemo(
     () => spawnIntervalMs(tokensEaten),
@@ -655,28 +772,6 @@ export function OuroSnakeGame() {
       }
     })();
   }, [status, publicKey, score, personalBest, refreshLeaderboard]);
-
-  useEffect(() => {
-    const video = boardAmbienceRef.current;
-    if (!video) return;
-    video.loop = true;
-    video.volume = BOARD_AMBIENCE_VOLUME;
-    video.muted = true;
-    void video.play().catch(() => {
-      /* autoplay blocked until user gesture */
-    });
-  }, []);
-
-  useEffect(() => {
-    const video = boardAmbienceRef.current;
-    if (!video) return;
-    if (status !== "playing" && status !== "dying") return;
-    video.volume = BOARD_AMBIENCE_VOLUME;
-    video.muted = false;
-    void video.play().catch(() => {
-      /* ignore play errors */
-    });
-  }, [status]);
 
   useEffect(() => {
     if (status !== "playing") {
@@ -1334,17 +1429,7 @@ export function OuroSnakeGame() {
             role="grid"
             aria-label="Snake game board"
           >
-            <video
-              ref={boardAmbienceRef}
-              className="ouro-snake__board-bg-video"
-              src={BOARD_AMBIENCE_VIDEO}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              aria-hidden
-            />
+            <BoardAmbienceVideo audioEnabled={boardAmbienceAudio} />
             <div className="ouro-snake__board-bg-scrim" aria-hidden />
             {selfEatActive && !isDying && (
               <div className="ouro-snake__ripple" aria-hidden />

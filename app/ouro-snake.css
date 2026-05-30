@@ -263,13 +263,21 @@
   isolation: isolate;
 }
 
+.ouro-snake__board-bg-video-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
 .ouro-snake__board-bg-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 0;
+  opacity: 0;
   pointer-events: none;
 }
 
