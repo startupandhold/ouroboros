@@ -663,6 +663,43 @@
   mix-blend-mode: soft-light;
 }
 
+.ouro-snake__void--warmup {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(140, 140, 150, 0.88) 0%,
+    rgba(70, 70, 80, 0.9) 45%,
+    rgba(35, 35, 42, 0.94) 100%
+  );
+  box-shadow:
+    inset 0 0 0 2px rgba(180, 180, 195, 0.55),
+    inset 0 0 10px rgba(120, 120, 135, 0.35),
+    0 0 6px rgba(150, 150, 165, 0.25);
+  animation: ouro-snake-void-warmup-pulse 2s ease-in-out infinite;
+}
+
+.ouro-snake__void--warmup::before {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(200, 200, 210, 0) 0deg 24deg,
+    rgba(200, 200, 210, 0.22) 24deg 42deg,
+    rgba(140, 140, 155, 0.14) 42deg 58deg,
+    rgba(200, 200, 210, 0) 58deg 90deg
+  );
+  animation-duration: 5s;
+}
+
+.ouro-snake__void--warmup::after {
+  background: conic-gradient(
+    from 180deg,
+    transparent 0deg,
+    rgba(210, 210, 220, 0.2) 70deg,
+    transparent 140deg,
+    rgba(100, 100, 115, 0.22) 220deg,
+    transparent 300deg
+  );
+  animation-duration: 4s;
+}
+
 .ouro-snake__void--warning {
   background: radial-gradient(
     circle at 50% 50%,
@@ -708,6 +745,14 @@
   animation-duration: 1.6s;
 }
 
+.ouro-snake__cell--void-warmup {
+  background: rgba(55, 55, 62, 0.38);
+  border-color: rgba(170, 170, 185, 0.65);
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 200, 210, 0.35),
+    0 0 6px rgba(130, 130, 145, 0.28);
+}
+
 .ouro-snake__cell--void-normal {
   background: rgba(65, 22, 110, 0.52);
   border-color: rgba(170, 90, 255, 0.95);
@@ -735,6 +780,18 @@
 @keyframes ouro-snake-void-swirl {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes ouro-snake-void-warmup-pulse {
+  0%,
+  100% {
+    opacity: 0.78;
+    filter: brightness(0.94) saturate(0.6);
+  }
+  50% {
+    opacity: 0.92;
+    filter: brightness(1.02) saturate(0.75);
   }
 }
 
@@ -1032,6 +1089,7 @@
   .ouro-snake__token--spawn,
   .ouro-snake__token--despawn,
   .ouro-snake__void,
+  .ouro-snake__void--warmup,
   .ouro-snake__void--warning,
   .ouro-snake__void--critical,
   .ouro-snake__void::before,

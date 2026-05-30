@@ -123,7 +123,7 @@ export function BurnHistoryPanel() {
 
       {!loading && !error && entries.length > 0 ? (
         <p className="burn-history__total">
-          ~{formatAmount(totalBurned)} OURO burned (all pages)
+          ~{formatAmount(totalBurned)} OUROBOROS burned (all pages)
         </p>
       ) : null}
 

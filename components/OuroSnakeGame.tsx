@@ -29,6 +29,7 @@ const VOID_FIRST_SPAWN_MS = 20_000;
 const VOID_SPAWN_INTERVAL_MS = 10_000;
 const VOID_SPAWN_DECAY_MS = 200;
 const VOID_LIFETIME_MS = 15_000;
+const VOID_WARMUP_MS = 2_000;
 const VOID_WARN_MS = 3_000;
 const VOID_CRITICAL_MS = 1_000;
 const VOID_TICK_MS = 100;
@@ -86,7 +87,7 @@ type VoidTile = {
   spawnedAt: number;
 };
 
-type VoidPhase = "normal" | "warning" | "critical";
+type VoidPhase = "warmup" | "normal" | "warning" | "critical";
 
 type GameStatus = "idle" | "playing" | "over";
 
@@ -117,10 +118,18 @@ function voidRemainingMs(voidTile: VoidTile, now = Date.now()) {
 }
 
 function voidPhase(voidTile: VoidTile, now = Date.now()): VoidPhase {
+  if (now - voidTile.spawnedAt < VOID_WARMUP_MS) return "warmup";
   const remaining = voidRemainingMs(voidTile, now);
   if (remaining <= VOID_CRITICAL_MS) return "critical";
   if (remaining <= VOID_WARN_MS) return "warning";
   return "normal";
+}
+
+function voidIsDeadly(voidTile: VoidTile, now = Date.now()) {
+  return (
+    voidRemainingMs(voidTile, now) > 0 &&
+    now - voidTile.spawnedAt >= VOID_WARMUP_MS
+  );
 }
 
 function occupiedCells(
@@ -944,7 +953,7 @@ export function OuroSnakeGame() {
       }
 
       const hitVoid = voidTilesRef.current.find((v) => same(v, nextHead));
-      if (hitVoid && voidRemainingMs(hitVoid) > 0) {
+      if (hitVoid && voidIsDeadly(hitVoid)) {
         gameOver();
         return;
       }
