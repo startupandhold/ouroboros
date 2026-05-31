@@ -1067,10 +1067,8 @@ export function OuroSnakeGame() {
   );
 
   const applyDirection = useCallback((dir: Dir) => {
-    const current = pendingDirRef.current ?? directionRef.current;
-    if (!isOpposite(current, dir)) {
-      pendingDirRef.current = dir;
-    }
+    if (isOpposite(directionRef.current, dir)) return;
+    pendingDirRef.current = dir;
   }, []);
 
   useEffect(() => {
