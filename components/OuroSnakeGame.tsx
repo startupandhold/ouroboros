@@ -1414,7 +1414,7 @@ export function OuroSnakeGame() {
       <div className="ouro-snake__hero">
         <h1 className="hero-logo">Devour the Cycle</h1>
         <p className="ouro-snake__subtitle">
-          Eat pump tokens. Every 6 feeds summons a glowing ouroboros — then you
+          Eat pump tokens and avoid the voids. Every 6 feeds summons a glowing ouroboros — then you
           may consume yourself, tail first.
         </p>
       </div>
