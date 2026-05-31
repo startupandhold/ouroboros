@@ -904,14 +904,6 @@ export function IncineratorPanel() {
                 )}
               </strong>
             </span>
-            <button
-              type="button"
-              className="btn btn-accent"
-              disabled={busyKey !== null}
-              onClick={() => void burnOuroboros()}
-            >
-              {busyKey === "burn-ouro" ? "signing…" : "burn all OUROBOROS"}
-            </button>
           </div>
         </div>
       )}
