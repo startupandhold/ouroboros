@@ -414,6 +414,21 @@
   box-shadow: none;
 }
 
+.ouro-snake__snake-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.ouro-snake__snake-segment {
+  position: absolute;
+  width: calc(100% / var(--grid));
+  height: calc(100% / var(--grid));
+  pointer-events: none;
+  will-change: left, top;
+}
+
 .ouro-snake__segment {
   position: absolute;
   inset: 0;
@@ -1342,6 +1357,55 @@
 
 .ouro-snake__stat-value {
   font-variant-numeric: tabular-nums;
+}
+
+.ouro-snake__motion-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+}
+
+.ouro-snake__motion-toggle-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ouro-snake__motion-toggle-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.ouro-snake__motion-btn {
+  margin: 0;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.ouro-snake__motion-btn:hover {
+  border-color: rgba(255, 200, 120, 0.45);
+  color: #e8e4dc;
+}
+
+.ouro-snake__motion-btn--active {
+  border-color: rgba(255, 200, 120, 0.55);
+  background: rgba(255, 200, 120, 0.12);
+  color: #ffd88a;
 }
 
 .ouro-snake__mode {

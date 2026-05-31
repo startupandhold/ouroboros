@@ -62,6 +62,15 @@ const SNAKE_PRELOAD_MEDIA = [
   AUDIO_PORTAL_SPAWN,
   BOARD_AMBIENCE_VIDEO,
 ] as const;
+const SMOOTH_MOTION_LS = "ouro-snake-smooth-motion";
+
+function readSmoothMotionPref(): boolean {
+  if (typeof window === "undefined") return true;
+  const stored = localStorage.getItem(SMOOTH_MOTION_LS);
+  if (stored === "0") return false;
+  if (stored === "1") return true;
+  return true;
+}
 
 function smoothstep(t: number): number {
   return t * t * (3 - 2 * t);
@@ -254,6 +263,47 @@ function shortWallet(address: string) {
 
 function same(a: Point, b: Point) {
   return a.x === b.x && a.y === b.y;
+}
+
+function cloneSnake(snake: Point[]): Point[] {
+  return snake.map((p) => ({ x: p.x, y: p.y }));
+}
+
+/** Maps a segment index from pre-tick to post-tick grid positions for interpolation. */
+function segmentMoveEndpoints(
+  fromSnake: Point[],
+  toSnake: Point[],
+  index: number,
+): { from: Point; to: Point } {
+  const to = toSnake[index];
+  if (!to) return { from: { x: 0, y: 0 }, to: { x: 0, y: 0 } };
+
+  if (toSnake.length > fromSnake.length) {
+    if (index === 0) return { from: fromSnake[0], to };
+    if (index === 1) return { from: fromSnake[0], to };
+    return { from: fromSnake[index - 1], to };
+  }
+
+  if (toSnake.length < fromSnake.length) {
+    if (index === 0) return { from: fromSnake[0], to };
+    return { from: fromSnake[index] ?? fromSnake[0], to };
+  }
+
+  return { from: fromSnake[index], to };
+}
+
+function snakeSegmentVisualPosition(
+  fromSnake: Point[],
+  toSnake: Point[],
+  index: number,
+  t: number,
+): Point {
+  const { from, to } = segmentMoveEndpoints(fromSnake, toSnake, index);
+  const eased = smoothstep(t);
+  return {
+    x: from.x + (to.x - from.x) * eased,
+    y: from.y + (to.y - from.y) * eased,
+  };
 }
 
 function voidSpawnIntervalMs(voidSpawnCount: number) {
@@ -640,6 +690,7 @@ export function OuroSnakeGame() {
   const [voidClock, setVoidClock] = useState(0);
   const [spawnTimerActive, setSpawnTimerActive] = useState(false);
   const [deathAnim, setDeathAnim] = useState<DeathAnim | null>(null);
+  const [smoothMotion, setSmoothMotion] = useState(readSmoothMotionPref);
 
   const directionRef = useRef<Dir>("right");
   const pendingDirRef = useRef<Dir | null>(null);
@@ -663,6 +714,10 @@ export function OuroSnakeGame() {
   const chillStartedRef = useRef(false);
   const chillPausedRef = useRef(false);
   const deathAnimRef = useRef<DeathAnim | null>(null);
+  const snakeMoveRef = useRef<{ from: Point[]; to: Point[] } | null>(null);
+  const snakeMoveStartedAtRef = useRef(0);
+  const smoothMotionRef = useRef(smoothMotion);
+  const [snakeMoveT, setSnakeMoveT] = useState(1);
 
   const [playChomp] = useSound(AUDIO_CHOMP, { volume: 0.65, interrupt: true });
   const [playPortalSpawn] = useSound(AUDIO_PORTAL_SPAWN, { volume: 0.7 });
@@ -697,6 +752,7 @@ export function OuroSnakeGame() {
   selfEatStartedRef.current = selfEatStarted;
   coinsRef.current = coins;
   deathAnimRef.current = deathAnim;
+  smoothMotionRef.current = smoothMotion;
 
   const displaySnake = useMemo(() => {
     if (!deathAnim) return snake;
@@ -709,6 +765,70 @@ export function OuroSnakeGame() {
   const displayDirection = deathAnim?.direction ?? direction;
   const isDying = status === "dying";
   const boardAmbienceAudio = status === "playing" || status === "dying";
+
+  const commitSnake = useCallback((next: Point[]) => {
+    const from = cloneSnake(snakeRef.current);
+    const cloned = cloneSnake(next);
+    snakeRef.current = cloned;
+    if (statusRef.current === "playing" && smoothMotionRef.current) {
+      snakeMoveRef.current = { from, to: cloned };
+      snakeMoveStartedAtRef.current = performance.now();
+      setSnakeMoveT(0);
+    }
+    setSnake(cloned);
+  }, []);
+
+  const snakeVisualPositions = useMemo(() => {
+    if (
+      !smoothMotion ||
+      isDying ||
+      snakeMoveT >= 1 ||
+      !snakeMoveRef.current
+    ) {
+      return displaySnake.map((p) => ({ x: p.x, y: p.y }));
+    }
+    const { from, to } = snakeMoveRef.current;
+    return displaySnake.map((_, i) =>
+      snakeSegmentVisualPosition(from, to, i, snakeMoveT),
+    );
+  }, [displaySnake, isDying, smoothMotion, snakeMoveT, snake]);
+
+  const setSmoothMotionPref = useCallback((enabled: boolean) => {
+    setSmoothMotion(enabled);
+    smoothMotionRef.current = enabled;
+    try {
+      localStorage.setItem(SMOOTH_MOTION_LS, enabled ? "1" : "0");
+    } catch {
+      /* ignore quota / private mode */
+    }
+    if (!enabled) {
+      snakeMoveRef.current = null;
+      setSnakeMoveT(1);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status !== "playing" || !smoothMotion) {
+      setSnakeMoveT(1);
+      if (!smoothMotion) snakeMoveRef.current = null;
+      return;
+    }
+
+    let raf = 0;
+    const loop = () => {
+      const move = snakeMoveRef.current;
+      if (move) {
+        const t = Math.min(
+          1,
+          (performance.now() - snakeMoveStartedAtRef.current) / TICK_MS,
+        );
+        setSnakeMoveT(t);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [status, smoothMotion]);
 
   const currentSpawnMs = useMemo(
     () => spawnIntervalMs(tokensEaten),
@@ -920,6 +1040,8 @@ export function OuroSnakeGame() {
     clearVoidTimer();
     const startSnake = initialSnake();
     snakeRef.current = startSnake;
+    snakeMoveRef.current = null;
+    setSnakeMoveT(1);
     directionRef.current = "right";
     pendingDirRef.current = null;
     tokensEatenRef.current = 0;
@@ -1060,10 +1182,9 @@ export function OuroSnakeGame() {
 
       tokensRef.current = nextTokens;
       setTokens(nextTokens);
-      snakeRef.current = [nextHead];
-      setSnake([nextHead]);
+      commitSnake([nextHead]);
     },
-    [spawnTimerActive, startSpawnTimer],
+    [commitSnake, spawnTimerActive, startSpawnTimer],
   );
 
   const applyDirection = useCallback((dir: Dir) => {
@@ -1201,8 +1322,7 @@ export function OuroSnakeGame() {
           setSelfEatStarted(false);
         }
 
-        snakeRef.current = [nextHead];
-        setSnake([nextHead]);
+        commitSnake([nextHead]);
         return;
       }
 
@@ -1240,8 +1360,7 @@ export function OuroSnakeGame() {
             } else {
               deadScalesRef.current = updatedScales;
               setDeadScales(updatedScales);
-              snakeRef.current = [nextHead];
-              setSnake([nextHead]);
+              commitSnake([nextHead]);
             }
             return;
           }
@@ -1263,8 +1382,7 @@ export function OuroSnakeGame() {
 
         deadScalesRef.current = appendTrail(head, dir, scales);
         setDeadScales(deadScalesRef.current);
-        snakeRef.current = [nextHead];
-        setSnake([nextHead]);
+        commitSnake([nextHead]);
 
         if (ateToken) {
           const nextTokens = tokensRef.current.filter(
@@ -1326,8 +1444,7 @@ export function OuroSnakeGame() {
         nextSnake = [nextHead, ...body.slice(0, -1)];
       }
 
-      snakeRef.current = nextSnake;
-      setSnake(nextSnake);
+      commitSnake(nextSnake);
 
       if (ateToken) {
         let nextTokens = tokensRef.current.filter((t) => t.id !== ateToken!.id);
@@ -1379,6 +1496,7 @@ export function OuroSnakeGame() {
     return () => clearInterval(id);
   }, [
     status,
+    commitSnake,
     finishSelfDevour,
     triggerDeath,
     spawnTimerActive,
@@ -1394,6 +1512,87 @@ export function OuroSnakeGame() {
     }
     if (status === "over" || status === "dying") return;
     applyDirection(dir);
+  };
+
+  const renderSnakeSegment = (
+    segIndex: number,
+    wrapper?: { className: string; style?: React.CSSProperties },
+  ) => {
+    const segment = snakeSegmentSprite(
+      displaySnake,
+      segIndex,
+      displayDirection,
+    );
+    const isHead = segIndex === 0;
+    const deathCause = deathAnim?.cause;
+    const deathDelay =
+      deathAnim
+        ? deathAnim.hitIndex != null
+          ? Math.abs(segIndex - deathAnim.hitIndex) * 0.055
+          : segIndex * 0.06
+        : 0;
+    const wallHeadAxis =
+      deathCause === "wall" && isHead
+        ? dirDelta(displayDirection).x !== 0
+          ? "x"
+          : "y"
+        : null;
+
+    const segmentClasses = [
+      "ouro-snake__segment",
+      selfEatActive && isHead && !isDying
+        ? "ouro-snake__segment--devour"
+        : "",
+      deathCause ? `ouro-snake__segment--death-${deathCause}` : "",
+      deathCause === "wall" && isHead && wallHeadAxis
+        ? `ouro-snake__segment--death-wall-head-${wallHeadAxis}`
+        : "",
+      deathCause === "void" && isHead
+        ? "ouro-snake__segment--death-void-head"
+        : "",
+      deathCause === "self" && isHead
+        ? "ouro-snake__segment--death-self-head"
+        : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const deathStyle =
+      isDying && deathCause
+        ? ({ "--death-delay": `${deathDelay}s` } as React.CSSProperties)
+        : undefined;
+
+    const segmentNode = (
+      <div
+        className={segmentClasses}
+        style={{
+          transform: `rotate(${segment.rotation}deg)`,
+          ...(!wrapper ? deathStyle : {}),
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={segment.src}
+          alt=""
+          className="ouro-snake__segment-img"
+          draggable={false}
+        />
+      </div>
+    );
+
+    if (!wrapper) return segmentNode;
+
+    return (
+      <div
+        className={wrapper.className}
+        style={{
+          ...wrapper.style,
+          ...deathStyle,
+        }}
+      >
+        {segmentNode}
+      </div>
+    );
   };
 
   const selfEatRate = selfEatPointsPerSegment(Math.max(1, ouroborosEaten));
@@ -1470,10 +1669,6 @@ export function OuroSnakeGame() {
               const rippleDelay = selfEatActive
                 ? Math.hypot(x - center, y - center) * 0.055
                 : 0;
-              const segment =
-                segIndex >= 0
-                  ? snakeSegmentSprite(displaySnake, segIndex, displayDirection)
-                  : null;
               const deathCause = deathAnim?.cause;
               const deathDelay =
                 deathAnim && segIndex >= 0
@@ -1481,13 +1676,6 @@ export function OuroSnakeGame() {
                     ? Math.abs(segIndex - deathAnim.hitIndex) * 0.055
                     : segIndex * 0.06
                   : 0;
-              const wallHeadAxis =
-                deathCause === "wall" && isHead
-                  ? dirDelta(displayDirection).x !== 0
-                    ? "x"
-                    : "y"
-                  : null;
-
               return (
                 <div
                   key={`${x}-${y}`}
@@ -1535,39 +1723,9 @@ export function OuroSnakeGame() {
                       aria-hidden
                     />
                   )}
-                  {segment && (
-                    <div
-                      className={[
-                        "ouro-snake__segment",
-                        selfEatActive && isHead && !isDying
-                          ? "ouro-snake__segment--devour"
-                          : "",
-                        deathCause
-                          ? `ouro-snake__segment--death-${deathCause}`
-                          : "",
-                        deathCause === "wall" && isHead && wallHeadAxis
-                          ? `ouro-snake__segment--death-wall-head-${wallHeadAxis}`
-                          : "",
-                        deathCause === "void" && isHead
-                          ? "ouro-snake__segment--death-void-head"
-                          : "",
-                        deathCause === "self" && isHead
-                          ? "ouro-snake__segment--death-self-head"
-                          : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      style={{ transform: `rotate(${segment.rotation}deg)` }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={segment.src}
-                        alt=""
-                        className="ouro-snake__segment-img"
-                        draggable={false}
-                      />
-                    </div>
-                  )}
+                  {!smoothMotion &&
+                    segIndex >= 0 &&
+                    renderSnakeSegment(segIndex)}
                   {token && (
                     <div
                       className={[
@@ -1609,6 +1767,27 @@ export function OuroSnakeGame() {
                 </div>
               );
             })}
+            {smoothMotion && displaySnake.length > 0 && (
+              <div className="ouro-snake__snake-layer" aria-hidden>
+                {displaySnake.map((_, segIndex) => {
+                  const pos = snakeVisualPositions[segIndex];
+                  if (!pos) return null;
+                  const isHead = segIndex === 0;
+                  return (
+                    <div key={`snake-${segIndex}`}>
+                      {renderSnakeSegment(segIndex, {
+                        className: "ouro-snake__snake-segment",
+                        style: {
+                          left: `calc(${pos.x} * 100% / ${GRID})`,
+                          top: `calc(${pos.y} * 100% / ${GRID})`,
+                          zIndex: isHead ? 5 : 4,
+                        },
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             {staticBody.length > 0 && (
               <div className="ouro-snake__static-layer" aria-hidden>
                 {staticBody.map((segment) => {
@@ -1852,6 +2031,43 @@ export function OuroSnakeGame() {
                 ? `${selfEatRate} pts/segment`
                 : "—"}
             </span>
+          </div>
+          <div className="ouro-snake__motion-toggle">
+            <span className="ouro-snake__motion-toggle-label" id="snake-motion-label">
+              Movement
+            </span>
+            <div
+              className="ouro-snake__motion-toggle-options"
+              role="group"
+              aria-labelledby="snake-motion-label"
+            >
+              <button
+                type="button"
+                className={[
+                  "ouro-snake__motion-btn",
+                  !smoothMotion ? "ouro-snake__motion-btn--active" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-pressed={!smoothMotion}
+                onClick={() => setSmoothMotionPref(false)}
+              >
+                Classic
+              </button>
+              <button
+                type="button"
+                className={[
+                  "ouro-snake__motion-btn",
+                  smoothMotion ? "ouro-snake__motion-btn--active" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-pressed={smoothMotion}
+                onClick={() => setSmoothMotionPref(true)}
+              >
+                Smooth
+              </button>
+            </div>
           </div>
           {selfEatActive && (
             <p className="ouro-snake__mode ouro-snake__mode--active">
