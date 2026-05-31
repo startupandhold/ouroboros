@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import useSound from "use-sound";
+import { useSnakeMediaPreload } from "@/lib/snakeMediaPreload";
 
 const GRID = 14;
 const TICK_MS = 160;
@@ -19,7 +20,7 @@ const SPAWN_SPEEDUP_MS = 200;
 const SPAWN_SPEEDUP_EVERY = 4;
 const OURO_SPAWN_EVERY = 6;
 const MAX_OURO_TOKENS = 5;
-const COIN_LIFETIME_MS = 5_000;
+const COIN_LIFETIME_MS = 15_000;
 const TOKEN_SPAWN_ANIM_MS = 520;
 const TOKEN_DESPAWN_ANIM_MS = 560;
 const TOKEN_POINTS = 10;
@@ -54,6 +55,13 @@ const AUDIO_PORTAL_SPAWN = "/audio/portal_spawn.ogg";
 const BOARD_AMBIENCE_VIDEO = "/video/spectral_sand_blue.mp4";
 const BOARD_AMBIENCE_VOLUME = 0.1;
 const BOARD_AMBIENCE_CROSSFADE_S = 1.5;
+const SNAKE_PRELOAD_MEDIA = [
+  AUDIO_CHILL,
+  AUDIO_CONSUME,
+  AUDIO_CHOMP,
+  AUDIO_PORTAL_SPAWN,
+  BOARD_AMBIENCE_VIDEO,
+] as const;
 
 function smoothstep(t: number): number {
   return t * t * (3 - 2 * t);
@@ -667,6 +675,13 @@ export function OuroSnakeGame() {
     loop: true,
   });
 
+  const {
+    progress: mediaProgress,
+    ready: mediaReady,
+    loadedCount: mediaLoadedCount,
+    total: mediaTotal,
+  } = useSnakeMediaPreload(SNAKE_PRELOAD_MEDIA);
+
   playChompRef.current = playChomp;
   playPortalSpawnRef.current = playPortalSpawn;
 
@@ -898,6 +913,8 @@ export function OuroSnakeGame() {
     return clearSpawnTimer;
   }, [currentSpawnMs, spawnTimerActive, status, startSpawnTimer, clearSpawnTimer]);
 
+  const canStartGame = mediaReady && !coinsLoading;
+
   const resetGame = useCallback(() => {
     clearSpawnTimer();
     clearVoidTimer();
@@ -943,6 +960,11 @@ export function OuroSnakeGame() {
     setTokens([{ ...first, permanent: true }]);
     setStatus("playing");
   }, [clearSpawnTimer, clearVoidTimer]);
+
+  const tryStartGame = useCallback(() => {
+    if (!canStartGame) return;
+    resetGame();
+  }, [canStartGame, resetGame]);
 
   const gameOver = useCallback(() => {
     deathAnimRef.current = null;
@@ -1057,6 +1079,7 @@ export function OuroSnakeGame() {
       if (!dir) return;
       e.preventDefault();
       if (statusRef.current === "idle") {
+        if (!mediaReady || coinsLoading) return;
         resetGame();
         return;
       }
@@ -1065,7 +1088,7 @@ export function OuroSnakeGame() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [applyDirection, resetGame]);
+  }, [applyDirection, resetGame, mediaReady, coinsLoading]);
 
   useEffect(() => {
     const hasTransforming = tokens.some((t) => t.transforming);
@@ -1366,6 +1389,7 @@ export function OuroSnakeGame() {
 
   const handlePad = (dir: Dir) => {
     if (status === "idle") {
+      if (!canStartGame) return;
       resetGame();
       applyDirection(dir);
       return;
@@ -1671,10 +1695,42 @@ export function OuroSnakeGame() {
               >
                 {status === "idle" && (
                   <>
-                    <p className="ouro-snake__overlay-title">Ready?</p>
-                    <p className="ouro-snake__overlay-hint">
-                      Arrow keys or WASD to move
+                    <p className="ouro-snake__overlay-title">
+                      {canStartGame ? "Ready?" : "Loading…"}
                     </p>
+                    {!mediaReady && (
+                      <div className="ouro-snake__loading">
+                        <div
+                          className="ouro-snake__loading-bar"
+                          role="progressbar"
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round(mediaProgress * 100)}
+                          aria-label="Loading audio and video"
+                        >
+                          <div
+                            className="ouro-snake__loading-bar-fill"
+                            style={{ width: `${mediaProgress * 100}%` }}
+                          />
+                        </div>
+                        <p className="ouro-snake__loading-label">
+                          Audio &amp; video{" "}
+                          {mediaTotal > 0
+                            ? `${mediaLoadedCount}/${mediaTotal}`
+                            : ""}
+                        </p>
+                      </div>
+                    )}
+                    {mediaReady && coinsLoading && (
+                      <p className="ouro-snake__overlay-hint">
+                        Loading tokens…
+                      </p>
+                    )}
+                    {canStartGame && (
+                      <p className="ouro-snake__overlay-hint">
+                        Arrow keys or WASD to move
+                      </p>
+                    )}
                     {!publicKey && (
                       <p className="ouro-snake__overlay-wallet-hint">
                         Connect your wallet to track high scores
@@ -1683,10 +1739,10 @@ export function OuroSnakeGame() {
                     <button
                       type="button"
                       className="ouro-snake__btn"
-                      onClick={resetGame}
-                      disabled={coinsLoading}
+                      onClick={tryStartGame}
+                      disabled={!canStartGame}
                     >
-                      {coinsLoading ? "Loading tokens…" : "Start"}
+                      Start
                     </button>
                   </>
                 )}
