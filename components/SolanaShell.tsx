@@ -4,21 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { OUROBOROS_MINT } from "@/lib/constants";
+import { PUMP_COIN_URL } from "@/lib/siteLinks";
 import { BurnHistoryPanel } from "@/components/BurnHistoryPanel";
 import { IncineratorPanel } from "@/components/IncineratorPanel";
 import { OuroLoreCard } from "@/components/OuroLoreCard";
 import { OuroSupplySerpent } from "@/components/OuroSupplySerpent";
+import { OuroGardenWelcome } from "@/components/OuroGardenWelcome";
 import { OuroborosFeedAnimation } from "@/components/OuroborosFeedAnimation";
 import { PanelFeedInfo } from "@/components/PanelFeedInfo";
+import { OuroSocialLinks } from "@/components/OuroSocialLinks";
 import { SolanaProviders } from "@/components/SolanaProviders";
 
-const PUMP_COIN_URL =
-  "https://pump.fun/coin/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
-const COIN_COMMUNITY_URL =
-  "https://coincommunities.org/communities/2yeyNC83oe3kht8Jnsd4xsrL64X35RYFKgZQakEdpump";
-const X_COMMUNITY_URL =
-  "https://x.com/i/communities/2019097621818929284";
-const GITHUB_URL = "https://github.com/startupandhold/ouroboros";
 const OURO_MINT_STR = OUROBOROS_MINT.toBase58();
 
 export function SolanaShell() {
@@ -57,69 +53,7 @@ export function SolanaShell() {
                 </Link>
               </div>
               <div className="top-bar-end">
-                <div className="top-bar-links" aria-label="Community links">
-                  <a
-                    href={PUMP_COIN_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="top-bar-icon"
-                    aria-label="Ouroboros on Pump.fun"
-                  >
-                    <Image
-                      src="/image/pumpfun_icon.png"
-                      alt=""
-                      width={20}
-                      height={20}
-                      aria-hidden
-                    />
-                  </a>
-                  <a
-                    href={COIN_COMMUNITY_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="top-bar-icon top-bar-icon--coin-community"
-                    aria-label="Ouroboros on Coin Communities"
-                    title="Coin Communities"
-                  >
-                    <Image
-                      src="/image/pump_community.svg"
-                      alt=""
-                      width={20}
-                      height={20}
-                      aria-hidden
-                    />
-                  </a>
-                  <a
-                    href={X_COMMUNITY_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="top-bar-icon"
-                    aria-label="Ouroboros X community"
-                  >
-                    <Image
-                      src="/image/x_icon.png"
-                      alt=""
-                      width={20}
-                      height={20}
-                      aria-hidden
-                    />
-                  </a>
-                  <a
-                    href={GITHUB_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="top-bar-icon top-bar-icon--github"
-                    aria-label="Ouroboros on GitHub"
-                  >
-                    <Image
-                      src="/image/github.png"
-                      alt=""
-                      width={20}
-                      height={20}
-                      aria-hidden
-                    />
-                  </a>
-                </div>
+                <OuroSocialLinks />
                 <span>solana · mainnet</span>
               </div>
             </header>
@@ -233,6 +167,8 @@ export function SolanaShell() {
               <a href={`https://pump.fun/coin/${OURO_MINT_STR}`} target="_blank" rel="noopener noreferrer">{OURO_MINT_STR}</a>.
             </p>
           </div>
+
+          <OuroGardenWelcome />
     </SolanaProviders>
   );
 }

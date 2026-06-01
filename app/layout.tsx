@@ -10,6 +10,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import "./globals.css";
 import "./ouro-lore.css";
 import "./ouro-supply.css";
+import "./ouro-garden.css";
 
 const inter = Inter({
   subsets: ["latin"],
